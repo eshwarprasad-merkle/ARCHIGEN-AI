@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXA</title>
+    <!-- <link rel="icon" type="image/x-icon" href="/images/favicon.ico"> -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="header">
+            <h1>NEXA</h1>
+            <p>NextGen Engineered eXpert Architecture <br>Configure your tech stack sequence</p>
+        </div>
+ 
+        <div class="form-container" autocomplete="off">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+ 
+            <div class="dropdowns-container">
+                <div class="dropdown-row first-row">
+                    <div class="form-group">
+                        <label for="Country">Country</label>
+                        <select class="dropdown" id="Country" autocomplete="off">
+                            <option value="">Select</option>
+                            <!-- <option value="None">None</option> -->
+                            <option value="India">India</option>
+                            <option value="USA">USA</option>
+                            <option value="UK">UK</option>
+                        </select>
+                        <span class="checkmark" id="check1">✓</span>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="cloudStack">Cloud Stack</label>
+                        <select class="dropdown" id="cloudStack" autocomplete="off">
+                            <option value="">Select</option>
+                            <!-- <option value="None">None</option> -->
+                            <option value="AWS">AWS</option>
+                            <option value="Azure">Azure</option>
+                            <option value="GCP">GCP</option>
+                        </select>
+                        <span class="checkmark" id="check2">✓</span>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="Welldefined">Well Defined Use Case</label>
+                        <select class="dropdown" id="Welldefined" autocomplete="off">
+                            <!-- <option value="">Select</option> -->
+                            <!-- <option value="None">None</option> -->
+                            <option value="Yes" >Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span class="checkmark" id="check3">✓</span>
+                    </div>
+                </div>
+ 
+                <div class="dropdown-row second-row">
+                    <div class="form-group">
+                        <label for="involvesML">Involves ML</label>
+                        <select class="dropdown" id="involvesML" autocomplete="off">
+                            <!-- <option value="">Select</option> -->
+                            <!-- <option value="None">None</option> -->
+                            <option value="Yes">Yes</option>
+                            <option value="No" >No</option>
+                        </select>
+                        <span class="checkmark" id="check4">✓</span>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="unstructuredData">Unstructured Data</label>
+                        <select class="dropdown" id="unstructuredData" autocomplete="off">
+                            <!-- <option value="">Select</option> -->
+                            <option value="Yes">Yes</option>
+                            <option value="No" >No</option>
+                        </select>
+                        <span class="checkmark" id="check5">✓</span>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="storagesolution">Storage Solution</label>
+                        <select class="dropdown" id="storagesolution" autocomplete="off" disabled>
+                            <!-- <option value="">Select</option> -->
+                            <option value="Data Warehouse">Data Warehouse</option>
+                            <option value="Data Lake">Data Lake</option>
+                        </select>
+                        <span class="checkmark" id="check6">✓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+        <div class="techstack-container">
+            <div class="techstack-header">
+                <h2>Tech Stack Selection</h2>
+                <p>Type and select technologies to build your stack sequence</p>
+            </div>
+           
+            <div class="techstack-content">
+                <div class="techstack-input-section">
+                    <h3>Add Technologies</h3>
+                    <div id="techInputs" class="tech-inputs-container">
+                        <div class="tech-input-group">
+                            <div class="tech-input-wrapper">
+                                <input
+                                    type="text"
+                                    class="tech-input"
+                                    placeholder="Type technology name (e.g., Airflow)"
+                                    autocomplete="off"
+                                >
+                                <div class="tech-suggestions" style="display: none;">
+                                    <ul class="suggestions-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="selected-techs-summary">
+                    <p>Selected: <span id="techSummary">0 technologies</span></p>
+                </div>
+            </div>
+ 
+            <div class="json-container" id="jsonContainer" style="display: block;">
+                <div class="json-header">
+                    <h3>✓ Row Data Selected</h3>
+                    <p>JSON payload ready for API transmission</p>
+                </div>
+                <div class="json-content">
+                    document.getElementById("jsonCode").textContent =
+                        JSON.stringify(data, null, 4);
+                    <div class="status-badge status-success">✓ Data Sent Successfully</div>
+                </div>
+            </div>
+        </div>
+ 
+        <div class="source-details-container" id="sourceDetailsContainer" style="display: block;">
+            <div class="source-details-header">
+                <h2>Source Details</h2>
+                <p>Select and add multiple source configurations</p>
+            </div>
+ 
+            <div class="source-selection">  
+                <div class="source-input-group">
+                    <div class="form-group">
+                        <label for="sourceTypeDropdown">Source Type</label>
+                        <select class="dropdown" id="sourceTypeDropdown" multiple>
+                            <option value="On-Prem File">On-Prem File</option>
+                            <option value="On-Prem Database">On-Prem Database</option>
+                            <!-- <option value="Cloud Storage">Cloud Storage</option> -->
+                            <!-- <option value="SaaS Application">SaaS Application</option> -->
+                            <option value="API Call">API Call</option>
+                            <option value="API Publisher">API Publisher</option>
+                            <option value="IOT">IOT</option>
+                        </select>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="modeDropdown">Mode</label>
+                        <select class="dropdown" id="modeDropdown" multiple>
+                            <option value="Batch">Batch</option>
+                            <option value="Real-Time">Real-Time</option>
+                            <!-- <option value="Hybrid">Hybrid</option> -->
+                        </select>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="varietyDropdown">Variety</label>
+                        <select class="dropdown" id="varietyDropdown" multiple>
+                            <option value="Structured">Structured</option>
+                            <option value="Semi-Structured">Semi-Structured</option>
+                            <option value="Unstructured">Unstructured</option>
+                        </select>
+                    </div>
+ 
+                    <button class="add-row-btn" id="addRowBtn">+ Add</button>
+                </div>
+ 
+                <div class="source-table-wrapper">
+                    <table class="source-table" id="sourceTable">
+                        <thead>
+                            <tr>
+                                <th>Source Type</th>
+                                <th>Mode</th>
+                                <th>Variety</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sourceTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+ 
+            <!-- Removed Go button - merged sections -->
+        </div>
+ 
+        <div class="matrix-container" id="matrixContainer" style="display: block;">
+            <div class="matrix-header">
+                <h2>✓ Tech Stack Architecture Matrix</h2>
+                <p>Recommended configuration based on your selections - Click any row to view details</p>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="matrix-table" id="matrixTable">
+                    <thead>
+                        <tr>
+                            <th>Serial Number</th>
+                            <th>Cloud</th>
+                            <th>Source Type</th>
+                            <th>Mode</th>
+                            <th>Data Ingestion</th>
+                            <th>Workflow Orchestration</th>
+                            <th>Data Transformation</th>
+                            <th>DataLake/Warehouse</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+ 
+        <div class="ml-results-container" id="mlResultsContainer" style="display: none;">
+            <div class="ml-results-header">
+                <h2>✓ ML Project - Data Lake Tech Stack Recommendations</h2>
+                <p>Tech stack configurations optimized for Machine Learning projects</p>
+                <button class="close-ml-results" id="closeMlResults">&times;</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="ml-results-table" id="mlResultsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cloud Provider</th>
+                            <th>Service</th>
+                            <th>Source Type</th>
+                            <th>Mode</th>
+                            <th>Tool</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mlResultsBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="ml-results-console" id="mlResultsConsole">
+                <pre id="mlConsoleOutput"></pre>
+            </div>
+        </div>
+ 
+        <div class="final-actions-container">
+            <button class="go-button-final" id="finalGoButton">Submit Configuration</button>
+            <button class="reset-button" id="resetButton">Reset All</button>
+        </div>
+    </div>
+ 
+    <script src="script.js"></script>
+</body>
+</html>
