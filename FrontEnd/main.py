@@ -8,7 +8,7 @@ CORS(app)  # Allow frontend requests
 # ✅ SQL Server Connection
 conn = pyodbc.connect(
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=IN-1YQNYP3;"
+    "SERVER=IN-2TJSYP3;"
     "DATABASE=archigenai;"
     "Trusted_Connection=yes;"
     "TrustServerCertificate=yes;"

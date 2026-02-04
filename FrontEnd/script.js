@@ -813,9 +813,225 @@ if (resetButton) {
 //         console.log('Storage Solution:', formData.storageSolution);
 //     })};
 
+// const finalGoButton = document.getElementById('finalGoButton');
+// if (finalGoButton) {
+//     finalGoButton.addEventListener('click', function() {
+//         // Collect all form data
+//         const formData = {
+//             country: document.getElementById('Country').value,
+//             cloudStack: document.getElementById('cloudStack').value,
+//             wellDefined: document.getElementById('Welldefined').value,
+//             involvesML: document.getElementById('involvesML').value,
+//             unstructuredData: document.getElementById('unstructuredData').value,
+//             storageSolution: document.getElementById('storagesolution').value,
+//             technologies: selectedStack,
+//             sourceDetails: sourceDetailsData
+//         };
+
+//         // Log to console
+//         console.log('===================');
+//         console.log('Configuration Submitted:', formData);
+//         console.log('Cloud Stack:', formData.cloudStack);
+//         console.log('Storage Solution:', formData.storageSolution);
+//         console.log('===================');
+
+//         // Provide visual feedback
+//         const originalText = finalGoButton.textContent;
+//         finalGoButton.textContent = '✓ Submitted';
+//         finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
+        
+//         setTimeout(() => {
+//             finalGoButton.textContent = originalText;
+//             finalGoButton.style.background = '';
+//         }, 2000);
+//     });
+// }
+
+//Final API populating results
+// function populateAPIResultsTable(data) {
+//     const apiResultsBody = document.getElementById('apiResultsBody');
+//     apiResultsBody.innerHTML = '';
+
+//     if (!data || data.length === 0) {
+//         const tr = document.createElement('tr');
+//         tr.innerHTML = '<td colspan="6" style="text-align: center; padding: 20px;">No results found</td>';
+//         apiResultsBody.appendChild(tr);
+//         return;
+//     }
+
+//     data.forEach((item, index) => {
+//         const tr = document.createElement('tr');
+//         tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+        
+//         tr.innerHTML = `
+//             <td>${item.cloud || 'N/A'}</td>
+//             <td>${item.service || 'N/A'}</td>
+//             <td>${item.tool || 'N/A'}</td>
+//             <td>${item.description || 'N/A'}</td>
+//             <td>${item.mode || 'N/A'}</td>
+//             <td>${item.source_type || 'N/A'}</td>
+//         `;
+        
+//         apiResultsBody.appendChild(tr);
+//     });
+// }
+
+// const finalGoButton = document.getElementById('finalGoButton');
+// if (finalGoButton) {
+//     finalGoButton.addEventListener('click', async function() {
+//         // Collect all form data
+//         const formData = {
+//             country: document.getElementById('Country').value,
+//             cloudStack: document.getElementById('cloudStack').value,
+//             wellDefined: document.getElementById('Welldefined').value,
+//             involvesML: document.getElementById('involvesML').value,
+//             unstructuredData: document.getElementById('unstructuredData').value,
+//             storageSolution: document.getElementById('storagesolution').value,
+//             technologies: selectedStack,
+//             sourceDetails: sourceDetailsData
+//         };
+
+//         // Get selected cloud from dropdown
+//         const cloudValue = document.getElementById("cloudStack").value;
+
+//         if (!cloudValue) {
+//             alert("Please select a Cloud Stack first!");
+//             return;
+//         }
+
+//         // Log to console
+//         console.log('===================');
+//         console.log('Configuration Submitted:', formData);
+//         console.log('Cloud Stack:', formData.cloudStack);
+//         console.log('Storage Solution:', formData.storageSolution);
+//         console.log('===================');
+
+//         // Provide visual feedback
+//         const originalText = finalGoButton.textContent;
+//         finalGoButton.textContent = '⏳ Fetching Results...';
+//         finalGoButton.disabled = true;
+
+//         try {
+//             // Call Flask API with cloud input
+//             const response = await fetch(
+//                 `http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`
+//             );
+
+//             if (!response.ok) {
+//                 throw new Error(`HTTP error! status: ${response.status}`);
+//             }
+
+//             const data = await response.json();
+
+//             console.log("Tech Stack Results:", data);
+
+//             // Populate the table with results
+//             populateAPIResultsTable(data);
+
+//             // Show the results container
+//             const apiResultsContainer = document.getElementById('apiResultsContainer');
+//             apiResultsContainer.classList.add('show');
+
+//             // Scroll to results
+//             setTimeout(() => {
+//                 apiResultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+//             }, 300);
+
+//             // Success feedback
+//             finalGoButton.textContent = '✓ Results Loaded';
+//             finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
+            
+//         } catch (error) {
+//             console.error("Error fetching data:", error);
+//             alert("Backend error. Please check console and make sure the server is running.");
+            
+//             finalGoButton.textContent = originalText;
+//             finalGoButton.style.background = '';
+//         } finally {
+//             setTimeout(() => {
+//                 finalGoButton.textContent = originalText;
+//                 finalGoButton.style.background = '';
+//                 finalGoButton.disabled = false;
+//             }, 2000);
+//         }
+//     });
+// }
+
+
+
+// ===== FIX FOR API RESULTS TABLE =====
+
+/**
+ * CORRECTED: Populate API results table with proper null handling
+ */
+function populateAPIResultsTable(data) {
+    const apiResultsBody = document.getElementById('apiResultsBody');
+    const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+    if (!apiResultsBody) {
+        console.error('❌ apiResultsBody element not found');
+        return;
+    }
+    
+    // Clear existing rows
+    apiResultsBody.innerHTML = '';
+
+    console.log('📊 Populating table with data:', data);
+    console.log('📊 Data length:', data.length);
+
+    if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="6" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+        apiResultsBody.appendChild(tr);
+        return;
+    }
+
+    // Populate each row
+    data.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+        
+        // Handle null values properly
+        const cloud = item.cloud || 'null';
+        const service = item.service || 'null';
+        const tool = item.tool || item.description || 'null'; // Use description as fallback
+        const description = item.description || 'null';
+        const mode = item.mode || 'null';
+        const sourceType = item.source_type || 'null';
+        
+        tr.innerHTML = `
+            <td>${cloud}</td>
+            <td>${service}</td>
+            <td>${sourceType}</td>
+            <td>${mode}</td>
+            <td>${tool}</td>
+            <td>${description}</td>
+           
+            
+        `;
+        
+        apiResultsBody.appendChild(tr);
+        
+        console.log(`✓ Row ${index + 1} added:`, {cloud, service, sourceType, mode ,tool, description });
+    });
+    
+    // Ensure container is visible
+    if (apiResultsContainer) {
+        apiResultsContainer.style.display = 'block';
+        apiResultsContainer.classList.add('show');
+        console.log('✓ API Results container made visible');
+    }
+    
+    console.log(`✅ Successfully populated ${data.length} rows`);
+}
+
+// ===== UPDATED FINAL GO BUTTON WITH BETTER ERROR HANDLING =====
+
 const finalGoButton = document.getElementById('finalGoButton');
 if (finalGoButton) {
-    finalGoButton.addEventListener('click', function() {
+    finalGoButton.addEventListener('click', async function() {
+        console.log('🔘 Submit button clicked');
+        
         // Collect all form data
         const formData = {
             country: document.getElementById('Country').value,
@@ -828,7 +1044,15 @@ if (finalGoButton) {
             sourceDetails: sourceDetailsData
         };
 
-        // Log to console
+        // Get selected cloud from dropdown
+        const cloudValue = document.getElementById("cloudStack").value;
+
+        if (!cloudValue) {
+            alert("Please select a Cloud Stack first!");
+            console.error('❌ No cloud selected');
+            return;
+        }
+
         console.log('===================');
         console.log('Configuration Submitted:', formData);
         console.log('Cloud Stack:', formData.cloudStack);
@@ -837,15 +1061,106 @@ if (finalGoButton) {
 
         // Provide visual feedback
         const originalText = finalGoButton.textContent;
-        finalGoButton.textContent = '✓ Submitted';
-        finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
-        
-        setTimeout(() => {
-            finalGoButton.textContent = originalText;
-            finalGoButton.style.background = '';
-        }, 2000);
+        finalGoButton.textContent = '⏳ Fetching Results...';
+        finalGoButton.disabled = true;
+        finalGoButton.style.opacity = '0.7';
+
+        try {
+            console.log(`📡 Fetching from: http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`);
+            
+            // Call Flask API with cloud input
+            const response = await fetch(
+                `http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`
+            );
+
+            console.log('📡 Response status:', response.status);
+            console.log('📡 Response ok:', response.ok);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            console.log('📊 API Response Data:', data);
+            console.log('📊 Data type:', typeof data);
+            console.log('📊 Is array:', Array.isArray(data));
+            console.log('📊 Data length:', data.length);
+
+            // Populate the table with results
+            populateAPIResultsTable(data);
+
+            // Show the results container
+            const apiResultsContainer = document.getElementById('apiResultsContainer');
+            if (apiResultsContainer) {
+                apiResultsContainer.style.display = 'block';
+                apiResultsContainer.classList.add('show');
+                console.log('✓ Container visibility set');
+                
+                // Scroll to results
+                setTimeout(() => {
+                    apiResultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    console.log('✓ Scrolled to results');
+                }, 300);
+            } else {
+                console.error('❌ apiResultsContainer not found in DOM');
+            }
+
+            // Success feedback
+            finalGoButton.textContent = '✓ Results Loaded';
+            finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
+            console.log('✅ Success! Table populated with', data.length, 'rows');
+            
+        } catch (error) {
+            console.error('❌ Error fetching data:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
+            alert(`Backend error: ${error.message}\n\nPlease check:\n1. Backend server is running on http://127.0.0.1:5000\n2. CORS is enabled\n3. API endpoint is correct\n\nCheck console for details.`);
+            
+            finalGoButton.textContent = '❌ Error - Try Again';
+            finalGoButton.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)';
+        } finally {
+            setTimeout(() => {
+                finalGoButton.textContent = originalText;
+                finalGoButton.style.background = '';
+                finalGoButton.style.opacity = '1';
+                finalGoButton.disabled = false;
+            }, 2000);
+        }
     });
+} else {
+    console.error('❌ finalGoButton not found in DOM');
 }
+
+// ===== DEBUGGING HELPER FUNCTION =====
+
+/**
+ * Call this function in console to check if elements exist
+ */
+function debugAPIResultsSetup() {
+    console.log('=== API Results Debug ===');
+    console.log('finalGoButton:', document.getElementById('finalGoButton'));
+    console.log('apiResultsContainer:', document.getElementById('apiResultsContainer'));
+    console.log('apiResultsTable:', document.getElementById('apiResultsTable'));
+    console.log('apiResultsBody:', document.getElementById('apiResultsBody'));
+    console.log('cloudStack dropdown:', document.getElementById('cloudStack'));
+    
+    const container = document.getElementById('apiResultsContainer');
+    if (container) {
+        console.log('Container display:', window.getComputedStyle(container).display);
+        console.log('Container visibility:', window.getComputedStyle(container).visibility);
+    }
+}
+
+// Make it globally available
+window.debugAPIResultsSetup = debugAPIResultsSetup;
+
+console.log('✅ Fixed script loaded. Run debugAPIResultsSetup() in console to check setup.');
+
+// Function to populate API results table
+
 // ===== ML FILTER FUNCTIONALITY =====
 
 /**
@@ -1045,33 +1360,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-finalGoButton.addEventListener("click", async function () {
+// finalGoButton.addEventListener("click", async function () {
 
-    // ✅ Get selected cloud from dropdown
-    const cloudValue = document.getElementById("cloudStack").value;
+//     // ✅ Get selected cloud from dropdown
+//     const cloudValue = document.getElementById("cloudStack").value;
 
-    if (!cloudValue) {
-        alert("Please select a Cloud Stack first!");
-        return;
-    }
+//     if (!cloudValue) {
+//         alert("Please select a Cloud Stack first!");
+//         return;
+//     }
 
-    console.log("Selected Cloud:", cloudValue);
+//     console.log("Selected Cloud:", cloudValue);
 
-    try {
-        // ✅ Call Flask API with cloud input
-        const response = await fetch(
-            `http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`
-        );
+//     try {
+//         // ✅ Call Flask API with cloud input
+//         const response = await fetch(
+//             `http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`
+//         );
 
-        const data = await response.json();
+//         const data = await response.json();
 
-        console.log("Tech Stack Results:", data);
+//         console.log("Tech Stack Results:", data);
 
-        // ✅ Display results in browser (simple testing)
-        alert("Rows returned: " + data.length);
+//         // ✅ Display results in browser (simple testing)
+//         alert("Rows returned: " + data.length);
 
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        alert("Backend error. Check console.");
-    }
-});
+//     } catch (error) {
+//         console.error("Error fetching data:", error);
+//         alert("Backend error. Check console.");
+//     }
+// });
