@@ -264,59 +264,394 @@ if (goButton) {
     });
 }
 
+// --------------------------------First Section start here--------------------
+async function loadCountries() {
+    try {
+        console.log('📡 Fetching countries from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/country');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const countries = await response.json();
+        const countryDropdown = document.getElementById('Country');
+        
+        if (!countryDropdown) {
+            console.error('❌ Country dropdown not found');
+            return;
+        }
+        
+        // Clear and populate
+        countryDropdown.innerHTML = '<option value="">Select Country</option>';
+        
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            countryDropdown.appendChild(option);
+        });
+        
+        console.log(`✅ Loaded ${countries.length} countries:`, countries);
+        
+    } catch (error) {
+        console.error('❌ Error loading countries:', error);
+        
+        const countryDropdown = document.getElementById('Country');
+        if (countryDropdown) {
+            countryDropdown.innerHTML = `
+                <option value="">Select Country</option>
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+                <option value="UK">UK</option>
+            `;
+            console.warn('⚠️ Using fallback country list');
+        }
+    }
+}
+
+// ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
+async function loadCloudProviders() {
+    try {
+        console.log('📡 Fetching cloud providers from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/cloud');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const cloudProviders = await response.json();
+        const cloudDropdown = document.getElementById('cloudStack');
+        
+        if (!cloudDropdown) {
+            console.error('❌ Cloud dropdown not found');
+            return;
+        }
+        
+        cloudDropdown.innerHTML = '<option value="">Select Cloud Stack</option>';
+        
+        cloudProviders.forEach(cloud => {
+            const option = document.createElement('option');
+            option.value = cloud;
+            option.textContent = cloud;
+            cloudDropdown.appendChild(option);
+        });
+        
+        console.log(`✅ Loaded ${cloudProviders.length} cloud providers:`, cloudProviders);
+        
+    } catch (error) {
+        console.error('❌ Error loading cloud providers:', error);
+        
+        const cloudDropdown = document.getElementById('cloudStack');
+        if (cloudDropdown) {
+            cloudDropdown.innerHTML = `
+                <option value="">Select Cloud Stack</option>
+                <option value="AWS">AWS</option>
+                <option value="Azure">Azure</option>
+                <option value="GCP">GCP</option>
+            `;
+            console.warn('⚠️ Using fallback cloud providers');
+        }
+    }
+}
+
+// ===== 🆕 LOAD COUNTRIES FROM DATABASE =====
+
+
 // ===== TECH STACK SELECTION FUNCTIONALITY =====
 
 // Available technologies for autocomplete
-const availableTechs = [
-    'Apache Spark',
-    'Apache Kafka',
-    'Apache Airflow',
-    'Hadoop',
-    'Python',
-    'Scala',
-    'SQL',
-    'Docker',
-    'Kubernetes',
-    'PostgreSQL',
-    'MongoDB',
-    'Redis',
-    'Databricks',
-    'Glue',
-    'EMR',
-    'AWS Batch',
-    'AWS Data Pipeline',
-    'Lake Formation',
-    'Athena ETL',
-    'Flink on Kinesis',
-    'Data Factory',
-    'Synapse Dataflow',
-    'SSIS',
-    'Azure Stream Analytics',
-    'Fabric Pipelines',
-    'Dataproc',
-    'Dataflow',
-    'Cloud Composer Operators',
-    'Vertex AI Pipelines',
-    'Flink on Dataflow',
-    'Databricks Delta Lake',
-    'Apache NiFi',
-    'Apache Beam',
-    'Talend',
-    'Informatica',
-    'KNIME',
-    'RapidMiner',
-    'TensorFlow',
-    'PyTorch',
-    'Scikit-learn',
-    'Java',
-    'JavaScript',
-    'Node.js',
-    'Spring Boot',
-    'FastAPI',
-    'GraphQL',
-    'REST',
-    'gRPC'
-];
+// const availableTechs = [
+//     'Apache Spark',
+//     'Apache Kafka',
+//     'Apache Airflow',
+//     'Hadoop',
+//     'Python',
+//     'Scala',
+//     'SQL',
+//     'Docker',
+//     'Kubernetes',
+//     'PostgreSQL',
+//     'MongoDB',
+//     'Redis',
+//     'Databricks',
+//     'Glue',
+//     'EMR',
+//     'AWS Batch',
+//     'AWS Data Pipeline',
+//     'Lake Formation',
+//     'Athena ETL',
+//     'Flink on Kinesis',
+//     'Data Factory',
+//     'Synapse Dataflow',
+//     'SSIS',
+//     'Azure Stream Analytics',
+//     'Fabric Pipelines',
+//     'Dataproc',
+//     'Dataflow',
+//     'Cloud Composer Operators',
+//     'Vertex AI Pipelines',
+//     'Flink on Dataflow',
+//     'Databricks Delta Lake',
+//     'Apache NiFi',
+//     'Apache Beam',
+//     'Talend',
+//     'Informatica',
+//     'KNIME',
+//     'RapidMiner',
+//     'TensorFlow',
+//     'PyTorch',
+//     'Scikit-learn',
+//     'Java',
+//     'JavaScript',
+//     'Node.js',
+//     'Spring Boot',
+//     'FastAPI',
+//     'GraphQL',
+//     'REST',
+//     'gRPC'
+// ];
+
+// const techInputsContainer = document.getElementById('techInputs');
+// let inputIndex = 0;
+
+// // Function to show suggestions dropdown
+// function showSuggestions(inputElement, suggestions) {
+//     const wrapper = inputElement.closest('.tech-input-wrapper');
+//     const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//     const suggestionsList = suggestionsDiv.querySelector('.suggestions-list');
+    
+//     if (!suggestions || suggestions.length === 0) {
+//         suggestionsDiv.style.display = 'none';
+//         return;
+//     }
+    
+//     suggestionsList.innerHTML = suggestions.map((tech, index) => `
+//         <li class="suggestion-item" data-tech="${tech}" data-index="${index}">${tech}</li>
+//     `).join('');
+    
+//     suggestionsDiv.style.display = 'block';
+    
+//     let highlightedIndex = -1;
+    
+//     // Add click handlers to suggestions
+//     suggestionsDiv.querySelectorAll('.suggestion-item').forEach((item, idx) => {
+//         item.addEventListener('click', function(e) {
+//             e.preventDefault();
+//             e.stopPropagation();
+//             const selectedTech = this.dataset.tech;
+//             addTechToStack(selectedTech, inputElement);
+//             suggestionsDiv.style.display = 'none';
+//         }, true);
+//     });
+    
+//     // Add keyboard navigation
+//     const keydownHandler = function(e) {
+//         const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+//         const itemCount = items.length;
+        
+//         if (e.key === 'ArrowDown') {
+//             e.preventDefault();
+//             highlightedIndex = (highlightedIndex + 1) % itemCount;
+//             updateHighlight();
+//         } else if (e.key === 'ArrowUp') {
+//             e.preventDefault();
+//             highlightedIndex = highlightedIndex <= 0 ? itemCount - 1 : highlightedIndex - 1;
+//             updateHighlight();
+//         } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+//             e.preventDefault();
+//             const selectedItem = items[highlightedIndex];
+//             const selectedTech = selectedItem.dataset.tech;
+//             addTechToStack(selectedTech, inputElement);
+//             suggestionsDiv.style.display = 'none';
+//             inputElement.removeEventListener('keydown', keydownHandler);
+//         } else if (e.key === 'Escape') {
+//             e.preventDefault();
+//             suggestionsDiv.style.display = 'none';
+//             inputElement.removeEventListener('keydown', keydownHandler);
+//         }
+//     };
+    
+//     function updateHighlight() {
+//         const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+//         items.forEach((item, idx) => {
+//             if (idx === highlightedIndex) {
+//                 item.classList.add('highlighted');
+//                 item.scrollIntoView({ block: 'nearest' });
+//             } else {
+//                 item.classList.remove('highlighted');
+//             }
+//         });
+//     }
+    
+//     inputElement.addEventListener('keydown', keydownHandler);
+// }
+
+// // Hide all suggestion dropdowns when clicking outside
+// document.addEventListener('click', function(e) {
+//     if (e.target.closest('.suggestion-item')) {
+//         return;
+//     }
+    
+//     if (!e.target.closest('.tech-input-wrapper')) {
+//         document.querySelectorAll('.tech-suggestions').forEach(div => {
+//             div.style.display = 'none';
+//         });
+//     }
+// }, false);
+
+// // Function to add technology to the selected stack
+// function addTechToStack(tech, inputElement) {
+//     const trimmedTech = tech.trim();
+    
+//     if (!trimmedTech) {
+//         return;
+//     }
+    
+//     // Check if tech is in the available list
+//     const validTech = availableTechs.find(t => t.toLowerCase() === trimmedTech.toLowerCase());
+    
+//     if (!validTech) {
+//         return;
+//     }
+    
+//     // Check if already added
+//     if (selectedStack.some(t => t.toLowerCase() === validTech.toLowerCase())) {
+//         return;
+//     }
+    
+//     selectedStack.push(validTech);
+//     inputElement.value = '';
+//     updateTechSummary();
+    
+//     // Hide suggestions
+//     const wrapper = inputElement.closest('.tech-input-wrapper');
+//     const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//     suggestionsDiv.style.display = 'none';
+// }
+
+// // Function to update the tech summary display
+// function updateTechSummary() {
+//     const techSummary = document.getElementById('techSummary');
+//     const count = selectedStack.length;
+    
+//     if (count === 0) {
+//         techSummary.textContent = '0 technologies';
+//     } else {
+//         techSummary.textContent = selectedStack.join(', ');
+//     }
+// }
+
+// // Function to filter suggestions based on input
+// function getFilteredSuggestions(query) {
+//     if (!query.trim()) return [];
+//     const lowerQuery = query.toLowerCase();
+//     return availableTechs.filter(tech => 
+//         tech.toLowerCase().includes(lowerQuery)
+//     ).slice(0, 8); // Limit to 8 suggestions
+// }
+
+// // Function to attach input listeners
+// function attachInputListeners(inputElement) {
+//     inputElement.addEventListener('input', function(e) {
+//         const query = this.value;
+//         const suggestions = getFilteredSuggestions(query);
+//         showSuggestions(this, suggestions);
+//     });
+    
+//     inputElement.addEventListener('keydown', function(e) {
+//         if (e.key === 'Enter') {
+//             e.preventDefault();
+//             const suggestions = getFilteredSuggestions(this.value);
+//             if (suggestions.length > 0) {
+//                 addTechToStack(suggestions[0], this);
+//                 const wrapper = this.closest('.tech-input-wrapper');
+//                 const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//                 suggestionsDiv.style.display = 'none';
+//             }
+//         }
+//     });
+    
+//     inputElement.addEventListener('blur', function(e) {
+//         const wrapper = this.closest('.tech-input-wrapper');
+//         const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//         suggestionsDiv.style.display = 'none';
+//     });
+// }
+
+// // Attach listeners to initial input
+// const techInputElements = document.querySelectorAll('.tech-input-group');
+
+// document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
+//     const input = group.querySelector('.tech-input');
+//     if (input) {
+//         attachInputListeners(input);
+//     }
+// });
+
+
+
+
+
+// ===== TECH STACK SELECTION FUNCTIONALITY =====
+
+// Available technologies for autocomplete - LOADED FROM DATABASE
+let availableTechs = [];
+let technologiesLoaded = false;
+
+// Load available technologies from backend
+async function loadAvailableTechnologies() {
+    if (technologiesLoaded) {
+        return availableTechs;
+    }
+    
+    try {
+        console.log('📡 Fetching available technologies from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/technologies');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Data is already a simple array of tech names
+        availableTechs = data;
+        technologiesLoaded = true;
+        
+        console.log(`✅ Loaded ${availableTechs.length} technologies from database`);
+        console.log('Sample technologies:', availableTechs.slice(0, 5));
+        
+        return availableTechs;
+        
+    } catch (error) {
+        console.error('❌ Error loading technologies:', error);
+        
+        // Fallback to minimal set if database fails
+        availableTechs = [
+            'Apache Spark',
+            'Apache Kafka',
+            'Apache Airflow',
+            'Python',
+            'SQL',
+            'Docker',
+            'Kubernetes'
+        ];
+        
+        console.warn('⚠️ Using fallback technology list');
+        technologiesLoaded = true;
+        return availableTechs;
+    }
+}
+
+// Initialize technologies when page loads
+window.addEventListener('DOMContentLoaded', async function() {
+    // Load technologies from database on page load
+    await loadAvailableTechnologies();
+});
 
 const techInputsContainer = document.getElementById('techInputs');
 let inputIndex = 0;
@@ -486,14 +821,20 @@ function attachInputListeners(inputElement) {
 }
 
 // Attach listeners to initial input
-const techInputElements = document.querySelectorAll('.tech-input-group');
-
 document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
     const input = group.querySelector('.tech-input');
     if (input) {
         attachInputListeners(input);
     }
 });
+
+
+
+
+
+
+
+
 
 // ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
 
@@ -1105,8 +1446,98 @@ if (closeMlResultsBtn) {
 }
 
 
-document.addEventListener('DOMContentLoaded', function() {
+// document.addEventListener('DOMContentLoaded', function() {
     
+//     const wellDefined = document.getElementById('Welldefined');
+//     const involvesML = document.getElementById('involvesML');
+//     const unstructuredData = document.getElementById('unstructuredData');
+//     const storageSolution = document.getElementById('storagesolution');
+//     const storageCheckmark = document.getElementById('check6');
+
+//     if (!wellDefined || !involvesML || !unstructuredData || !storageSolution) {
+//         console.warn('Storage rule dropdowns not found');
+//         return;
+//     }
+
+//     // Set default values
+//     wellDefined.value = 'Yes';
+//     involvesML.value = 'No';
+//     unstructuredData.value = 'No';
+    // ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
+// async function loadCloudProviders() {
+//     try {
+//         console.log('📡 Fetching cloud providers from database...');
+        
+//         const response = await fetch('http://127.0.0.1:5000/api/cloud');
+        
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+        
+//         const cloudProviders = await response.json();
+//         const cloudDropdown = document.getElementById('cloudStack');
+        
+//         if (!cloudDropdown) {
+//             console.error('❌ Cloud dropdown not found');
+//             return;
+//         }
+        
+//         // Clear and populate
+//         cloudDropdown.innerHTML = '<option value="">Select Cloud Stack</option>';
+        
+//         cloudProviders.forEach(cloud => {
+//             const option = document.createElement('option');
+//             option.value = cloud;
+//             option.textContent = cloud;
+//             cloudDropdown.appendChild(option);
+//         });
+        
+//         console.log(`✅ Loaded ${cloudProviders.length} cloud providers:`, cloudProviders);
+        
+//     } catch (error) {
+//         console.error('❌ Error loading cloud providers:', error);
+        
+//         const cloudDropdown = document.getElementById('cloudStack');
+//         if (cloudDropdown) {
+//             cloudDropdown.innerHTML = `
+//                 <option value="">Select Cloud Stack</option>
+//                 <option value="AWS">AWS</option>
+//                 <option value="Azure">Azure</option>
+//                 <option value="GCP">GCP</option>
+//             `;
+//             console.warn('⚠️ Using fallback cloud providers');
+//         }
+//     }
+// }
+
+// // ===== LOAD TECHNOLOGIES FROM DATABASE =====
+// async function loadAvailableTechnologies() {
+//     // ... your existing code
+// }
+
+// // ===== INITIALIZE ON PAGE LOAD =====
+// document.addEventListener('DOMContentLoaded', async function() {
+    
+//     // Load data from database
+//     await loadCloudProviders();
+//     await loadAvailableTechnologies();
+    
+//     // Existing storage rules code
+//     const wellDefined = document.getElementById('Welldefined');
+//     const involvesML = document.getElementById('involvesML');
+//     const unstructuredData = document.getElementById('unstructuredData');
+//     const storageSolution = document.getElementById('storagesolution');
+
+//     // ... rest of your existing code
+// });
+document.addEventListener('DOMContentLoaded', async function() {
+    
+    // 🆕 Load cloud providers and technologies from database FIRST
+    await loadCountries()
+    await loadCloudProviders();
+    await loadAvailableTechnologies();
+    
+    // Then handle storage rules
     const wellDefined = document.getElementById('Welldefined');
     const involvesML = document.getElementById('involvesML');
     const unstructuredData = document.getElementById('unstructuredData');
@@ -1123,6 +1554,47 @@ document.addEventListener('DOMContentLoaded', function() {
     involvesML.value = 'No';
     unstructuredData.value = 'No';
 
+    function updateStorageDecision() {
+        console.log('Storage Decision Inputs:', {
+            wellDefined: wellDefined.value,
+            involvesML: involvesML.value,
+            unstructuredData: unstructuredData.value
+        });
+
+        if (
+            wellDefined.value === 'Yes' &&
+            involvesML.value === 'No' &&
+            unstructuredData.value === 'No'
+        ) {
+            storageSolution.value = 'Data Warehouse';
+            console.log('✓ Storage Decision: Data Warehouse');
+        } else {
+            storageSolution.value = 'Data Lake';
+            console.log('✓ Storage Decision: Data Lake');
+        }
+        
+        if (storageCheckmark) {
+            storageCheckmark.classList.add('show');
+        }
+        
+        if (wellDefined.value) {
+            document.getElementById('check3')?.classList.add('show');
+        }
+        if (involvesML.value) {
+            document.getElementById('check4')?.classList.add('show');
+        }
+        
+        updateProgress();
+    }
+
+    // Initial update
+    updateStorageDecision();
+
+    // Listen to dependency changes
+    wellDefined.addEventListener('change', updateStorageDecision);
+    involvesML.addEventListener('change', updateStorageDecision);
+    unstructuredData.addEventListener('change', updateStorageDecision);
+});
     function updateStorageDecision() {
         console.log('Storage Decision Inputs:', {
             wellDefined: wellDefined.value,
@@ -1170,6 +1642,6 @@ document.addEventListener('DOMContentLoaded', function() {
     involvesML.addEventListener('change', updateStorageDecision);
     unstructuredData.addEventListener('change', updateStorageDecision);
 
-});
+
 
 
