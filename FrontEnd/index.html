@@ -196,7 +196,7 @@
             <!-- Removed Go button - merged sections -->
         </div>
  
-        <div class="matrix-container" id="matrixContainer" style="display: block;">
+        <!-- <div class="matrix-container" id="matrixContainer" style="display: block;">
             <div class="matrix-header">
                 <h2>✓ Tech Stack Architecture Matrix</h2>
                 <p>Recommended configuration based on your selections - Click any row to view details</p>
@@ -219,7 +219,32 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div> -->
+
+        <div class="api-results-container" id="apiResultsContainer" style="display: none;">
+    <div class="api-results-header">
+        <h2>✓ Tech Stack Results</h2>
+        <p>Results from your configuration</p>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="api-results-table" id="apiResultsTable">
+            <thead>
+                <tr>
+                    <th>Cloud</th>
+                    <th>Service</th>
+                    <th>Source Type</th>
+                    <th>Mode</th>
+                    <th>Tool</th>
+                    <th>Description</th>
+                    
+                    
+                </tr>
+            </thead>
+            <tbody id="apiResultsBody">
+            </tbody>
+        </table>
+    </div>
+</div>
  
         <div class="ml-results-container" id="mlResultsContainer" style="display: none;">
             <div class="ml-results-header">
@@ -231,7 +256,7 @@
                 <table class="ml-results-table" id="mlResultsTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <!-- <th>ID</th> -->
                             <th>Cloud Provider</th>
                             <th>Service</th>
                             <th>Source Type</th>
