@@ -138,6 +138,54 @@ def get_country():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/source-combinations', methods=['GET'])
+def get_source_combinations():
+    """
+    Fetch valid source type, mode, and variety combinations from database
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        query = """
+        SELECT DISTINCT source_type, mode, variety
+        FROM source_detail
+        ORDER BY source_type, mode, variety
+        """
+        
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        # Group by source_type for easier frontend filtering
+        combinations = {}
+        for row in rows:
+            source_type = row[0]
+            mode = row[1]
+            variety = row[2]
+            
+            if source_type not in combinations:
+                combinations[source_type] = {
+                    'modes': set(),
+                    'varieties': set()
+                }
+            
+            combinations[source_type]['modes'].add(mode)
+            combinations[source_type]['varieties'].add(variety)
+        
+        # Convert sets to lists for JSON serialization
+        for source_type in combinations:
+            combinations[source_type]['modes'] = list(combinations[source_type]['modes'])
+            combinations[source_type]['varieties'] = list(combinations[source_type]['varieties'])
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(combinations)
+        
+    except Exception as e:
+        print(f"Error fetching source combinations: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

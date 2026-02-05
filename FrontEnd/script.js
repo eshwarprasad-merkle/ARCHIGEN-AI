@@ -838,6 +838,74 @@ document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
 
 // ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
 
+// const sourceTypeDropdown = document.getElementById('sourceTypeDropdown');
+// const modeDropdown = document.getElementById('modeDropdown');
+// const varietyDropdown = document.getElementById('varietyDropdown');
+// const addRowBtn = document.getElementById('addRowBtn');
+// const sourceTableBody = document.getElementById('sourceTableBody');
+// const sourceDetailsContainer = document.getElementById('sourceDetailsContainer');
+// let sourceDetailsData = [];
+
+// // Auto-select Mode based on Source Type
+// sourceTypeDropdown.addEventListener('change', function() {
+//     const selectedSourceTypes = Array.from(this.selectedOptions).map(opt => opt.value);
+    
+//     // Get mode options
+//     const batchOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Batch');
+//     const realtimeOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Real-Time');
+    
+//     // Reset mode first
+//     modeDropdown.selectedIndex = -1;
+    
+//     // Auto-select and disable based on source type
+//     if (selectedSourceTypes.includes('API Call')) {
+//         // For API Call: Select Batch, disable Real-Time
+//         if (batchOption) {
+//             batchOption.selected = true;
+//             batchOption.disabled = false;
+//         }
+//         if (realtimeOption) {
+//             realtimeOption.selected = false;
+//             realtimeOption.disabled = true;
+//         }
+//     } else if (selectedSourceTypes.includes('API Publisher') || selectedSourceTypes.includes('IOT')) {
+//         // For API Publisher or IOT: Select Real-Time, disable Batch
+//         if (realtimeOption) {
+//             realtimeOption.selected = true;
+//             realtimeOption.disabled = false;
+//         }
+//         if (batchOption) {
+//             batchOption.selected = false;
+//             batchOption.disabled = true;
+//         }
+//     } else {
+//         // For other source types: Enable both modes
+//         if (batchOption) {
+//             batchOption.disabled = false;
+//         }
+//         if (realtimeOption) {
+//             realtimeOption.disabled = false;
+//         }
+//     }
+    
+//     updateAddButtonState();
+// });
+
+// // Enable/disable Add button when selections are made
+// function updateAddButtonState() {
+//     const hasSourceType = sourceTypeDropdown.selectedOptions.length > 0;
+//     const hasMode = modeDropdown.selectedOptions.length > 0;
+//     const hasVariety = varietyDropdown.selectedOptions.length > 0;
+//     addRowBtn.disabled = !(hasSourceType && hasMode && hasVariety);
+// }
+
+// sourceTypeDropdown.addEventListener('change', updateAddButtonState);
+// modeDropdown.addEventListener('change', updateAddButtonState);
+// varietyDropdown.addEventListener('change', updateAddButtonState);
+
+
+// ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
+
 const sourceTypeDropdown = document.getElementById('sourceTypeDropdown');
 const modeDropdown = document.getElementById('modeDropdown');
 const varietyDropdown = document.getElementById('varietyDropdown');
@@ -845,51 +913,140 @@ const addRowBtn = document.getElementById('addRowBtn');
 const sourceTableBody = document.getElementById('sourceTableBody');
 const sourceDetailsContainer = document.getElementById('sourceDetailsContainer');
 let sourceDetailsData = [];
+let sourceCombinations = {}; // Store valid combinations from database
 
-// Auto-select Mode based on Source Type
-sourceTypeDropdown.addEventListener('change', function() {
-    const selectedSourceTypes = Array.from(this.selectedOptions).map(opt => opt.value);
+// Map frontend display names to database values
+const SOURCE_TYPE_MAPPING = {
+    'On-Prem File': 'File',
+    'On-Prem Database': 'Database',
+    'API Call': 'API call',
+    'API Publisher': 'API Publisher',
+    'IOT': 'IOT'
+};
+
+// ===== LOAD SOURCE COMBINATIONS FROM DATABASE =====
+async function loadSourceCombinations() {
+    try {
+        console.log('📡 Fetching source combinations from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/source-combinations');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        sourceCombinations = await response.json();
+        console.log('✅ Loaded source combinations:', sourceCombinations);
+        
+    } catch (error) {
+        console.error('❌ Error loading source combinations:', error);
+        
+        // Fallback to hardcoded rules if database fails
+        sourceCombinations = {
+            'File': {
+                modes: ['Batch', 'Real-time'],
+                varieties: ['Semi-Structured', 'Unstructured']
+            },
+            'Database': {
+                modes: ['Batch', 'Real-time'],
+                varieties: ['Structured', 'Semi-Structured']
+            },
+            'API call': {
+                modes: ['Batch'],
+                varieties: ['Semi-Structured']
+            },
+            'API Publisher': {
+                modes: ['Real-time'],
+                varieties: ['Semi-Structured']
+            },
+            'IOT': {
+                modes: ['Real-time'],
+                varieties: ['Semi-Structured', 'Unstructured']
+            }
+        };
+        console.warn('⚠️ Using fallback source combinations');
+    }
+}
+
+// ===== FILTER DROPDOWNS BASED ON SOURCE TYPE SELECTION =====
+function filterDropdownOptions() {
+    const selectedSourceTypes = Array.from(sourceTypeDropdown.selectedOptions).map(opt => opt.value);
     
-    // Get mode options
-    const batchOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Batch');
-    const realtimeOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Real-Time');
+    console.log('Selected source types:', selectedSourceTypes);
     
-    // Reset mode first
-    modeDropdown.selectedIndex = -1;
-    
-    // Auto-select and disable based on source type
-    if (selectedSourceTypes.includes('API Call')) {
-        // For API Call: Select Batch, disable Real-Time
-        if (batchOption) {
-            batchOption.selected = true;
-            batchOption.disabled = false;
-        }
-        if (realtimeOption) {
-            realtimeOption.selected = false;
-            realtimeOption.disabled = true;
-        }
-    } else if (selectedSourceTypes.includes('API Publisher') || selectedSourceTypes.includes('IOT')) {
-        // For API Publisher or IOT: Select Real-Time, disable Batch
-        if (realtimeOption) {
-            realtimeOption.selected = true;
-            realtimeOption.disabled = false;
-        }
-        if (batchOption) {
-            batchOption.selected = false;
-            batchOption.disabled = true;
-        }
-    } else {
-        // For other source types: Enable both modes
-        if (batchOption) {
-            batchOption.disabled = false;
-        }
-        if (realtimeOption) {
-            realtimeOption.disabled = false;
-        }
+    // If no source type selected, disable mode and variety
+    if (selectedSourceTypes.length === 0) {
+        resetDropdown(modeDropdown);
+        resetDropdown(varietyDropdown);
+        updateAddButtonState();
+        return;
     }
     
+    // Get the database value for selected source type (use first selection if multiple)
+    const dbSourceType = SOURCE_TYPE_MAPPING[selectedSourceTypes[0]];
+    const validCombination = sourceCombinations[dbSourceType];
+    
+    if (!validCombination) {
+        console.warn('No valid combination found for:', dbSourceType);
+        return;
+    }
+    
+    console.log('Valid combination:', validCombination);
+    
+    // Filter Mode dropdown
+    filterDropdown(modeDropdown, validCombination.modes);
+    
+    // Filter Variety dropdown
+    filterDropdown(varietyDropdown, validCombination.varieties);
+    
     updateAddButtonState();
-});
+}
+
+// Helper function to filter a dropdown
+function filterDropdown(dropdown, validValues) {
+    Array.from(dropdown.options).forEach(option => {
+        if (option.value === '') {
+            option.disabled = false;
+            option.style.display = '';
+            option.style.opacity = '1';  
+            option.style.color = ''; 
+            return;
+        }
+        
+        const isValid = validValues.includes(option.value);
+        option.disabled = !isValid;
+        option.style.display = isValid ? '' : 'none';
+        option.style.display = '';
+        
+        // Deselect if currently selected but not valid
+        if (!isValid) {
+            option.style.opacity = '0.4';  // Make it look grayed out
+            option.style.color = '#888';   // Gray text color
+        } else {
+            option.style.opacity = '1';    // Normal opacity
+            option.style.color = '';       // Normal color
+        }
+        
+        // Deselect if currently selected but not valid
+        if (!isValid && option.selected) {
+            option.selected = false;
+        }
+    });
+}
+
+// Helper function to reset a dropdown
+function resetDropdown(dropdown) {
+    Array.from(dropdown.options).forEach(option => {
+        option.disabled = option.value === '';
+        option.style.display = '';
+        option.style.opacity = '1';    // ✅ NEW: Reset opacity
+        option.style.color = '';
+        option.selected = false;
+    });
+}
+
+// Attach event listener to source type dropdown
+sourceTypeDropdown.addEventListener('change', filterDropdownOptions);
 
 // Enable/disable Add button when selections are made
 function updateAddButtonState() {
@@ -902,6 +1059,8 @@ function updateAddButtonState() {
 sourceTypeDropdown.addEventListener('change', updateAddButtonState);
 modeDropdown.addEventListener('change', updateAddButtonState);
 varietyDropdown.addEventListener('change', updateAddButtonState);
+
+// ... rest of your existing code (getSelectedValues, add row functionality, etc.)
 
 // Get selected values from multi-select dropdowns
 function getSelectedValues(selectElement) {
@@ -1536,7 +1695,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadCountries()
     await loadCloudProviders();
     await loadAvailableTechnologies();
-    
+    await loadSourceCombinations();
     // Then handle storage rules
     const wellDefined = document.getElementById('Welldefined');
     const involvesML = document.getElementById('involvesML');
