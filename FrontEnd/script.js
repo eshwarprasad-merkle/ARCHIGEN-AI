@@ -601,7 +601,7 @@ async function loadCloudProviders() {
 let availableTechs = [];
 let technologiesLoaded = false;
 
-// Load available technologies from backend
+// ===== LOAD TECHNOLOGIES FROM DATABASE =====
 async function loadAvailableTechnologies() {
     if (technologiesLoaded) {
         return availableTechs;
@@ -646,7 +646,109 @@ async function loadAvailableTechnologies() {
         return availableTechs;
     }
 }
+// Load available technologies from backend
+// async function loadAvailableTechnologies() {
+//     if (technologiesLoaded) {
+//         return availableTechs;
+//     }
+    
+//     try {
+//         console.log('📡 Fetching available technologies from database...');
+        
+//         const response = await fetch('http://127.0.0.1:5000/api/technologies');
+        
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+        
+//         const data = await response.json();
+        
+//         // Data is already a simple array of tech names
+//         availableTechs = data;
+//         technologiesLoaded = true;
+        
+//         console.log(`✅ Loaded ${availableTechs.length} technologies from database`);
+//         console.log('Sample technologies:', availableTechs.slice(0, 5));
+        
+//         return availableTechs;
+        
+//     } catch (error) {
+//         console.error('❌ Error loading technologies:', error);
+        
+//         // Fallback to minimal set if database fails
+//         availableTechs = [
+//             'Apache Spark',
+//             'Apache Kafka',
+//             'Apache Airflow',
+//             'Python',
+//             'SQL',
+//             'Docker',
+//             'Kubernetes'
+//         ];
+        
+//         console.warn('⚠️ Using fallback technology list');
+//         technologiesLoaded = true;
+//         return availableTechs;
+//     }
+// }
 
+// @app.route('/api/technologies', methods=['GET'])
+// def get_technologies():
+//     try:
+//         cursor = conn.cursor()
+        
+//         # Get distinct technology names, filtering out NULLs
+//         query = """
+//             SELECT DISTINCT tool
+//             FROM your_table_name 
+//             WHERE tool_name IS NOT NULL
+//             ORDER BY tool_name
+//         """
+        
+//         cursor.execute(query)
+//         rows = cursor.fetchall()
+        
+//         # Extract just the tool names into a simple list
+//         technologies = [row[0] for row in rows]
+        
+//         print(f"✅ Returning {len(technologies)} technologies")
+        
+//         return jsonify(technologies)
+    
+//     except Exception as e:
+//         print(f"❌ Error in /api/technologies: {e}")
+//         import traceback
+//         traceback.print_exc()
+//         return jsonify({'error': str(e)}), 500
+// @app.route('/api/technologies', methods=['GET'])
+// def get_technologies():
+//     try:
+//         cursor = conn.cursor()
+        
+//         # Replace 'tech_stack' with your actual table name
+//         # Replace 'description' with the actual column name containing tool names
+//         query = """
+//             SELECT DISTINCT description
+//             FROM tech_stack 
+//             WHERE description IS NOT NULL
+//             ORDER BY description
+//         """
+        
+//         cursor.execute(query)
+//         rows = cursor.fetchall()
+        
+//         # Extract just the tool names into a simple list
+//         technologies = [row[0] for row in rows]
+        
+//         print(f"✅ Returning {len(technologies)} technologies")
+        
+//         return jsonify(technologies)
+    
+//     except Exception as e:
+//         print(f"❌ Error in /api/technologies: {e}")
+//         import traceback
+//         traceback.print_exc()
+//         return jsonify({'error': str(e)}), 500
 // Initialize technologies when page loads
 window.addEventListener('DOMContentLoaded', async function() {
     // Load technologies from database on page load

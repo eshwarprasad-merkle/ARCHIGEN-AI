@@ -73,9 +73,9 @@ def get_technologies():
     """
     try:
         query = """
-            SELECT tech_name
-            FROM available_technologies
-            ORDER BY tech_name
+            SELECT DISTINCT tool 
+            FROM tech_stack 
+            ORDER BY tool
         """
         
         cursor = conn.cursor()
@@ -84,6 +84,8 @@ def get_technologies():
         
         # Return simple list of tech names
         result = [row[0] for row in rows]
+
+        # console.log(result)
         
         return jsonify(result)
     
@@ -98,8 +100,10 @@ def get_cloud():
     """
     try:
         query = """
-            SELECT cloud_name
-            FROM cloud
+            SELECT DISTINCT cloud 
+            FROM tech_stack 
+            WHERE cloud IS NOT NULL
+            ORDER BY cloud
         """
         
         cursor = conn.cursor()
@@ -137,54 +141,43 @@ def get_country():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 
-@app.route('/api/source-combinations', methods=['GET'])
+@app.route("/api/source-combinations", methods=["GET"])
 def get_source_combinations():
     """
-    Fetch valid source type, mode, and variety combinations from database
+    Return valid Mode and Variety combinations for each Source Type
+    Based on business rules
     """
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        query = """
-        SELECT DISTINCT source_type, mode, variety
-        FROM source_detail
-        ORDER BY source_type, mode, variety
-        """
-        
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        
-        # Group by source_type for easier frontend filtering
-        combinations = {}
-        for row in rows:
-            source_type = row[0]
-            mode = row[1]
-            variety = row[2]
-            
-            if source_type not in combinations:
-                combinations[source_type] = {
-                    'modes': set(),
-                    'varieties': set()
-                }
-            
-            combinations[source_type]['modes'].add(mode)
-            combinations[source_type]['varieties'].add(variety)
-        
-        # Convert sets to lists for JSON serialization
-        for source_type in combinations:
-            combinations[source_type]['modes'] = list(combinations[source_type]['modes'])
-            combinations[source_type]['varieties'] = list(combinations[source_type]['varieties'])
-        
-        cursor.close()
-        conn.close()
+        # Define the valid combinations based on your requirements
+        combinations = {
+            'File': {
+                'modes': ['Batch', 'Real-time'],
+                'varieties': ['Semi-Structured', 'Unstructured']
+            },
+            'Database': {
+                'modes': ['Batch', 'Real-time'],
+                'varieties': ['Structured', 'Semi-Structured']
+            },
+            'API call': {
+                'modes': ['Batch'],
+                'varieties': ['Semi-Structured']
+            },
+            'API Publisher': {
+                'modes': ['Real-time'],
+                'varieties': ['Semi-Structured']
+            },
+            'IOT': {
+                'modes': ['Real-time'],
+                'varieties': ['Semi-Structured', 'Unstructured']
+            }
+        }
         
         return jsonify(combinations)
-        
+    
     except Exception as e:
-        print(f"Error fetching source combinations: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
