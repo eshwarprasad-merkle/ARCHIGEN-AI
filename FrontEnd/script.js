@@ -350,7 +350,7 @@ async function loadCountries() {
     try {
         console.log('📡 Fetching countries from database...');
         
-        const response = await fetch('http://127.0.0.1:5000/api/country');
+        const response = await fetch('http://127.0.0.1:5000/api/config?key=COUNTRIES&split=true');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
