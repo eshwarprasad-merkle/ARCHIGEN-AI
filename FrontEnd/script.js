@@ -264,59 +264,496 @@ if (goButton) {
     });
 }
 
+// --------------------------------First Section start here--------------------
+async function loadCountries() {
+    try {
+        console.log('📡 Fetching countries from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/country');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const countries = await response.json();
+        const countryDropdown = document.getElementById('Country');
+        
+        if (!countryDropdown) {
+            console.error('❌ Country dropdown not found');
+            return;
+        }
+        
+        // Clear and populate
+        countryDropdown.innerHTML = '<option value="">Select Country</option>';
+        
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            countryDropdown.appendChild(option);
+        });
+        
+        console.log(`✅ Loaded ${countries.length} countries:`, countries);
+        
+    } catch (error) {
+        console.error('❌ Error loading countries:', error);
+        
+        const countryDropdown = document.getElementById('Country');
+        if (countryDropdown) {
+            countryDropdown.innerHTML = `
+                <option value="">Select Country</option>
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+                <option value="UK">UK</option>
+            `;
+            console.warn('⚠️ Using fallback country list');
+        }
+    }
+}
+
+// ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
+async function loadCloudProviders() {
+    try {
+        console.log('📡 Fetching cloud providers from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/cloud');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const cloudProviders = await response.json();
+        const cloudDropdown = document.getElementById('cloudStack');
+        
+        if (!cloudDropdown) {
+            console.error('❌ Cloud dropdown not found');
+            return;
+        }
+        
+        cloudDropdown.innerHTML = '<option value="">Select Cloud Stack</option>';
+        
+        cloudProviders.forEach(cloud => {
+            const option = document.createElement('option');
+            option.value = cloud;
+            option.textContent = cloud;
+            cloudDropdown.appendChild(option);
+        });
+        
+        console.log(`✅ Loaded ${cloudProviders.length} cloud providers:`, cloudProviders);
+        
+    } catch (error) {
+        console.error('❌ Error loading cloud providers:', error);
+        
+        const cloudDropdown = document.getElementById('cloudStack');
+        if (cloudDropdown) {
+            cloudDropdown.innerHTML = `
+                <option value="">Select Cloud Stack</option>
+                <option value="AWS">AWS</option>
+                <option value="Azure">Azure</option>
+                <option value="GCP">GCP</option>
+            `;
+            console.warn('⚠️ Using fallback cloud providers');
+        }
+    }
+}
+
+// ===== 🆕 LOAD COUNTRIES FROM DATABASE =====
+
+
 // ===== TECH STACK SELECTION FUNCTIONALITY =====
 
 // Available technologies for autocomplete
-const availableTechs = [
-    'Apache Spark',
-    'Apache Kafka',
-    'Apache Airflow',
-    'Hadoop',
-    'Python',
-    'Scala',
-    'SQL',
-    'Docker',
-    'Kubernetes',
-    'PostgreSQL',
-    'MongoDB',
-    'Redis',
-    'Databricks',
-    'Glue',
-    'EMR',
-    'AWS Batch',
-    'AWS Data Pipeline',
-    'Lake Formation',
-    'Athena ETL',
-    'Flink on Kinesis',
-    'Data Factory',
-    'Synapse Dataflow',
-    'SSIS',
-    'Azure Stream Analytics',
-    'Fabric Pipelines',
-    'Dataproc',
-    'Dataflow',
-    'Cloud Composer Operators',
-    'Vertex AI Pipelines',
-    'Flink on Dataflow',
-    'Databricks Delta Lake',
-    'Apache NiFi',
-    'Apache Beam',
-    'Talend',
-    'Informatica',
-    'KNIME',
-    'RapidMiner',
-    'TensorFlow',
-    'PyTorch',
-    'Scikit-learn',
-    'Java',
-    'JavaScript',
-    'Node.js',
-    'Spring Boot',
-    'FastAPI',
-    'GraphQL',
-    'REST',
-    'gRPC'
-];
+// const availableTechs = [
+//     'Apache Spark',
+//     'Apache Kafka',
+//     'Apache Airflow',
+//     'Hadoop',
+//     'Python',
+//     'Scala',
+//     'SQL',
+//     'Docker',
+//     'Kubernetes',
+//     'PostgreSQL',
+//     'MongoDB',
+//     'Redis',
+//     'Databricks',
+//     'Glue',
+//     'EMR',
+//     'AWS Batch',
+//     'AWS Data Pipeline',
+//     'Lake Formation',
+//     'Athena ETL',
+//     'Flink on Kinesis',
+//     'Data Factory',
+//     'Synapse Dataflow',
+//     'SSIS',
+//     'Azure Stream Analytics',
+//     'Fabric Pipelines',
+//     'Dataproc',
+//     'Dataflow',
+//     'Cloud Composer Operators',
+//     'Vertex AI Pipelines',
+//     'Flink on Dataflow',
+//     'Databricks Delta Lake',
+//     'Apache NiFi',
+//     'Apache Beam',
+//     'Talend',
+//     'Informatica',
+//     'KNIME',
+//     'RapidMiner',
+//     'TensorFlow',
+//     'PyTorch',
+//     'Scikit-learn',
+//     'Java',
+//     'JavaScript',
+//     'Node.js',
+//     'Spring Boot',
+//     'FastAPI',
+//     'GraphQL',
+//     'REST',
+//     'gRPC'
+// ];
+
+// const techInputsContainer = document.getElementById('techInputs');
+// let inputIndex = 0;
+
+// // Function to show suggestions dropdown
+// function showSuggestions(inputElement, suggestions) {
+//     const wrapper = inputElement.closest('.tech-input-wrapper');
+//     const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//     const suggestionsList = suggestionsDiv.querySelector('.suggestions-list');
+    
+//     if (!suggestions || suggestions.length === 0) {
+//         suggestionsDiv.style.display = 'none';
+//         return;
+//     }
+    
+//     suggestionsList.innerHTML = suggestions.map((tech, index) => `
+//         <li class="suggestion-item" data-tech="${tech}" data-index="${index}">${tech}</li>
+//     `).join('');
+    
+//     suggestionsDiv.style.display = 'block';
+    
+//     let highlightedIndex = -1;
+    
+//     // Add click handlers to suggestions
+//     suggestionsDiv.querySelectorAll('.suggestion-item').forEach((item, idx) => {
+//         item.addEventListener('click', function(e) {
+//             e.preventDefault();
+//             e.stopPropagation();
+//             const selectedTech = this.dataset.tech;
+//             addTechToStack(selectedTech, inputElement);
+//             suggestionsDiv.style.display = 'none';
+//         }, true);
+//     });
+    
+//     // Add keyboard navigation
+//     const keydownHandler = function(e) {
+//         const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+//         const itemCount = items.length;
+        
+//         if (e.key === 'ArrowDown') {
+//             e.preventDefault();
+//             highlightedIndex = (highlightedIndex + 1) % itemCount;
+//             updateHighlight();
+//         } else if (e.key === 'ArrowUp') {
+//             e.preventDefault();
+//             highlightedIndex = highlightedIndex <= 0 ? itemCount - 1 : highlightedIndex - 1;
+//             updateHighlight();
+//         } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+//             e.preventDefault();
+//             const selectedItem = items[highlightedIndex];
+//             const selectedTech = selectedItem.dataset.tech;
+//             addTechToStack(selectedTech, inputElement);
+//             suggestionsDiv.style.display = 'none';
+//             inputElement.removeEventListener('keydown', keydownHandler);
+//         } else if (e.key === 'Escape') {
+//             e.preventDefault();
+//             suggestionsDiv.style.display = 'none';
+//             inputElement.removeEventListener('keydown', keydownHandler);
+//         }
+//     };
+    
+//     function updateHighlight() {
+//         const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+//         items.forEach((item, idx) => {
+//             if (idx === highlightedIndex) {
+//                 item.classList.add('highlighted');
+//                 item.scrollIntoView({ block: 'nearest' });
+//             } else {
+//                 item.classList.remove('highlighted');
+//             }
+//         });
+//     }
+    
+//     inputElement.addEventListener('keydown', keydownHandler);
+// }
+
+// // Hide all suggestion dropdowns when clicking outside
+// document.addEventListener('click', function(e) {
+//     if (e.target.closest('.suggestion-item')) {
+//         return;
+//     }
+    
+//     if (!e.target.closest('.tech-input-wrapper')) {
+//         document.querySelectorAll('.tech-suggestions').forEach(div => {
+//             div.style.display = 'none';
+//         });
+//     }
+// }, false);
+
+// // Function to add technology to the selected stack
+// function addTechToStack(tech, inputElement) {
+//     const trimmedTech = tech.trim();
+    
+//     if (!trimmedTech) {
+//         return;
+//     }
+    
+//     // Check if tech is in the available list
+//     const validTech = availableTechs.find(t => t.toLowerCase() === trimmedTech.toLowerCase());
+    
+//     if (!validTech) {
+//         return;
+//     }
+    
+//     // Check if already added
+//     if (selectedStack.some(t => t.toLowerCase() === validTech.toLowerCase())) {
+//         return;
+//     }
+    
+//     selectedStack.push(validTech);
+//     inputElement.value = '';
+//     updateTechSummary();
+    
+//     // Hide suggestions
+//     const wrapper = inputElement.closest('.tech-input-wrapper');
+//     const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//     suggestionsDiv.style.display = 'none';
+// }
+
+// // Function to update the tech summary display
+// function updateTechSummary() {
+//     const techSummary = document.getElementById('techSummary');
+//     const count = selectedStack.length;
+    
+//     if (count === 0) {
+//         techSummary.textContent = '0 technologies';
+//     } else {
+//         techSummary.textContent = selectedStack.join(', ');
+//     }
+// }
+
+// // Function to filter suggestions based on input
+// function getFilteredSuggestions(query) {
+//     if (!query.trim()) return [];
+//     const lowerQuery = query.toLowerCase();
+//     return availableTechs.filter(tech => 
+//         tech.toLowerCase().includes(lowerQuery)
+//     ).slice(0, 8); // Limit to 8 suggestions
+// }
+
+// // Function to attach input listeners
+// function attachInputListeners(inputElement) {
+//     inputElement.addEventListener('input', function(e) {
+//         const query = this.value;
+//         const suggestions = getFilteredSuggestions(query);
+//         showSuggestions(this, suggestions);
+//     });
+    
+//     inputElement.addEventListener('keydown', function(e) {
+//         if (e.key === 'Enter') {
+//             e.preventDefault();
+//             const suggestions = getFilteredSuggestions(this.value);
+//             if (suggestions.length > 0) {
+//                 addTechToStack(suggestions[0], this);
+//                 const wrapper = this.closest('.tech-input-wrapper');
+//                 const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//                 suggestionsDiv.style.display = 'none';
+//             }
+//         }
+//     });
+    
+//     inputElement.addEventListener('blur', function(e) {
+//         const wrapper = this.closest('.tech-input-wrapper');
+//         const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
+//         suggestionsDiv.style.display = 'none';
+//     });
+// }
+
+// // Attach listeners to initial input
+// const techInputElements = document.querySelectorAll('.tech-input-group');
+
+// document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
+//     const input = group.querySelector('.tech-input');
+//     if (input) {
+//         attachInputListeners(input);
+//     }
+// });
+
+
+
+
+
+// ===== TECH STACK SELECTION FUNCTIONALITY =====
+
+// Available technologies for autocomplete - LOADED FROM DATABASE
+let availableTechs = [];
+let technologiesLoaded = false;
+
+// ===== LOAD TECHNOLOGIES FROM DATABASE =====
+async function loadAvailableTechnologies() {
+    if (technologiesLoaded) {
+        return availableTechs;
+    }
+    
+    try {
+        console.log('📡 Fetching available technologies from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/technologies');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Data is already a simple array of tech names
+        availableTechs = data;
+        technologiesLoaded = true;
+        
+        console.log(`✅ Loaded ${availableTechs.length} technologies from database`);
+        console.log('Sample technologies:', availableTechs.slice(0, 5));
+        
+        return availableTechs;
+        
+    } catch (error) {
+        console.error('❌ Error loading technologies:', error);
+        
+        // Fallback to minimal set if database fails
+        availableTechs = [
+            'Apache Spark',
+            'Apache Kafka',
+            'Apache Airflow',
+            'Python',
+            'SQL',
+            'Docker',
+            'Kubernetes'
+        ];
+        
+        console.warn('⚠️ Using fallback technology list');
+        technologiesLoaded = true;
+        return availableTechs;
+    }
+}
+// Load available technologies from backend
+// async function loadAvailableTechnologies() {
+//     if (technologiesLoaded) {
+//         return availableTechs;
+//     }
+    
+//     try {
+//         console.log('📡 Fetching available technologies from database...');
+        
+//         const response = await fetch('http://127.0.0.1:5000/api/technologies');
+        
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+        
+//         const data = await response.json();
+        
+//         // Data is already a simple array of tech names
+//         availableTechs = data;
+//         technologiesLoaded = true;
+        
+//         console.log(`✅ Loaded ${availableTechs.length} technologies from database`);
+//         console.log('Sample technologies:', availableTechs.slice(0, 5));
+        
+//         return availableTechs;
+        
+//     } catch (error) {
+//         console.error('❌ Error loading technologies:', error);
+        
+//         // Fallback to minimal set if database fails
+//         availableTechs = [
+//             'Apache Spark',
+//             'Apache Kafka',
+//             'Apache Airflow',
+//             'Python',
+//             'SQL',
+//             'Docker',
+//             'Kubernetes'
+//         ];
+        
+//         console.warn('⚠️ Using fallback technology list');
+//         technologiesLoaded = true;
+//         return availableTechs;
+//     }
+// }
+
+// @app.route('/api/technologies', methods=['GET'])
+// def get_technologies():
+//     try:
+//         cursor = conn.cursor()
+        
+//         # Get distinct technology names, filtering out NULLs
+//         query = """
+//             SELECT DISTINCT tool
+//             FROM your_table_name 
+//             WHERE tool_name IS NOT NULL
+//             ORDER BY tool_name
+//         """
+        
+//         cursor.execute(query)
+//         rows = cursor.fetchall()
+        
+//         # Extract just the tool names into a simple list
+//         technologies = [row[0] for row in rows]
+        
+//         print(f"✅ Returning {len(technologies)} technologies")
+        
+//         return jsonify(technologies)
+    
+//     except Exception as e:
+//         print(f"❌ Error in /api/technologies: {e}")
+//         import traceback
+//         traceback.print_exc()
+//         return jsonify({'error': str(e)}), 500
+// @app.route('/api/technologies', methods=['GET'])
+// def get_technologies():
+//     try:
+//         cursor = conn.cursor()
+        
+//         # Replace 'tech_stack' with your actual table name
+//         # Replace 'description' with the actual column name containing tool names
+//         query = """
+//             SELECT DISTINCT description
+//             FROM tech_stack 
+//             WHERE description IS NOT NULL
+//             ORDER BY description
+//         """
+        
+//         cursor.execute(query)
+//         rows = cursor.fetchall()
+        
+//         # Extract just the tool names into a simple list
+//         technologies = [row[0] for row in rows]
+        
+//         print(f"✅ Returning {len(technologies)} technologies")
+        
+//         return jsonify(technologies)
+    
+//     except Exception as e:
+//         print(f"❌ Error in /api/technologies: {e}")
+//         import traceback
+//         traceback.print_exc()
+//         return jsonify({'error': str(e)}), 500
+// Initialize technologies when page loads
+window.addEventListener('DOMContentLoaded', async function() {
+    // Load technologies from database on page load
+    await loadAvailableTechnologies();
+});
 
 const techInputsContainer = document.getElementById('techInputs');
 let inputIndex = 0;
@@ -486,14 +923,88 @@ function attachInputListeners(inputElement) {
 }
 
 // Attach listeners to initial input
-const techInputElements = document.querySelectorAll('.tech-input-group');
-
 document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
     const input = group.querySelector('.tech-input');
     if (input) {
         attachInputListeners(input);
     }
 });
+
+
+
+
+
+
+
+
+
+// ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
+
+// const sourceTypeDropdown = document.getElementById('sourceTypeDropdown');
+// const modeDropdown = document.getElementById('modeDropdown');
+// const varietyDropdown = document.getElementById('varietyDropdown');
+// const addRowBtn = document.getElementById('addRowBtn');
+// const sourceTableBody = document.getElementById('sourceTableBody');
+// const sourceDetailsContainer = document.getElementById('sourceDetailsContainer');
+// let sourceDetailsData = [];
+
+// // Auto-select Mode based on Source Type
+// sourceTypeDropdown.addEventListener('change', function() {
+//     const selectedSourceTypes = Array.from(this.selectedOptions).map(opt => opt.value);
+    
+//     // Get mode options
+//     const batchOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Batch');
+//     const realtimeOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Real-Time');
+    
+//     // Reset mode first
+//     modeDropdown.selectedIndex = -1;
+    
+//     // Auto-select and disable based on source type
+//     if (selectedSourceTypes.includes('API Call')) {
+//         // For API Call: Select Batch, disable Real-Time
+//         if (batchOption) {
+//             batchOption.selected = true;
+//             batchOption.disabled = false;
+//         }
+//         if (realtimeOption) {
+//             realtimeOption.selected = false;
+//             realtimeOption.disabled = true;
+//         }
+//     } else if (selectedSourceTypes.includes('API Publisher') || selectedSourceTypes.includes('IOT')) {
+//         // For API Publisher or IOT: Select Real-Time, disable Batch
+//         if (realtimeOption) {
+//             realtimeOption.selected = true;
+//             realtimeOption.disabled = false;
+//         }
+//         if (batchOption) {
+//             batchOption.selected = false;
+//             batchOption.disabled = true;
+//         }
+//     } else {
+//         // For other source types: Enable both modes
+//         if (batchOption) {
+//             batchOption.disabled = false;
+//         }
+//         if (realtimeOption) {
+//             realtimeOption.disabled = false;
+//         }
+//     }
+    
+//     updateAddButtonState();
+// });
+
+// // Enable/disable Add button when selections are made
+// function updateAddButtonState() {
+//     const hasSourceType = sourceTypeDropdown.selectedOptions.length > 0;
+//     const hasMode = modeDropdown.selectedOptions.length > 0;
+//     const hasVariety = varietyDropdown.selectedOptions.length > 0;
+//     addRowBtn.disabled = !(hasSourceType && hasMode && hasVariety);
+// }
+
+// sourceTypeDropdown.addEventListener('change', updateAddButtonState);
+// modeDropdown.addEventListener('change', updateAddButtonState);
+// varietyDropdown.addEventListener('change', updateAddButtonState);
+
 
 // ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
 
@@ -504,51 +1015,140 @@ const addRowBtn = document.getElementById('addRowBtn');
 const sourceTableBody = document.getElementById('sourceTableBody');
 const sourceDetailsContainer = document.getElementById('sourceDetailsContainer');
 let sourceDetailsData = [];
+let sourceCombinations = {}; // Store valid combinations from database
 
-// Auto-select Mode based on Source Type
-sourceTypeDropdown.addEventListener('change', function() {
-    const selectedSourceTypes = Array.from(this.selectedOptions).map(opt => opt.value);
+// Map frontend display names to database values
+const SOURCE_TYPE_MAPPING = {
+    'On-Prem File': 'File',
+    'On-Prem Database': 'Database',
+    'API Call': 'API call',
+    'API Publisher': 'API Publisher',
+    'IOT': 'IOT'
+};
+
+// ===== LOAD SOURCE COMBINATIONS FROM DATABASE =====
+async function loadSourceCombinations() {
+    try {
+        console.log('📡 Fetching source combinations from database...');
+        
+        const response = await fetch('http://127.0.0.1:5000/api/source-combinations');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        sourceCombinations = await response.json();
+        console.log('✅ Loaded source combinations:', sourceCombinations);
+        
+    } catch (error) {
+        console.error('❌ Error loading source combinations:', error);
+        
+        // Fallback to hardcoded rules if database fails
+        sourceCombinations = {
+            'File': {
+                modes: ['Batch', 'Real-time'],
+                varieties: ['Semi-Structured', 'Unstructured']
+            },
+            'Database': {
+                modes: ['Batch', 'Real-time'],
+                varieties: ['Structured', 'Semi-Structured']
+            },
+            'API call': {
+                modes: ['Batch'],
+                varieties: ['Semi-Structured']
+            },
+            'API Publisher': {
+                modes: ['Real-time'],
+                varieties: ['Semi-Structured']
+            },
+            'IOT': {
+                modes: ['Real-time'],
+                varieties: ['Semi-Structured', 'Unstructured']
+            }
+        };
+        console.warn('⚠️ Using fallback source combinations');
+    }
+}
+
+// ===== FILTER DROPDOWNS BASED ON SOURCE TYPE SELECTION =====
+function filterDropdownOptions() {
+    const selectedSourceTypes = Array.from(sourceTypeDropdown.selectedOptions).map(opt => opt.value);
     
-    // Get mode options
-    const batchOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Batch');
-    const realtimeOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Real-Time');
+    console.log('Selected source types:', selectedSourceTypes);
     
-    // Reset mode first
-    modeDropdown.selectedIndex = -1;
-    
-    // Auto-select and disable based on source type
-    if (selectedSourceTypes.includes('API Call')) {
-        // For API Call: Select Batch, disable Real-Time
-        if (batchOption) {
-            batchOption.selected = true;
-            batchOption.disabled = false;
-        }
-        if (realtimeOption) {
-            realtimeOption.selected = false;
-            realtimeOption.disabled = true;
-        }
-    } else if (selectedSourceTypes.includes('API Publisher') || selectedSourceTypes.includes('IOT')) {
-        // For API Publisher or IOT: Select Real-Time, disable Batch
-        if (realtimeOption) {
-            realtimeOption.selected = true;
-            realtimeOption.disabled = false;
-        }
-        if (batchOption) {
-            batchOption.selected = false;
-            batchOption.disabled = true;
-        }
-    } else {
-        // For other source types: Enable both modes
-        if (batchOption) {
-            batchOption.disabled = false;
-        }
-        if (realtimeOption) {
-            realtimeOption.disabled = false;
-        }
+    // If no source type selected, disable mode and variety
+    if (selectedSourceTypes.length === 0) {
+        resetDropdown(modeDropdown);
+        resetDropdown(varietyDropdown);
+        updateAddButtonState();
+        return;
     }
     
+    // Get the database value for selected source type (use first selection if multiple)
+    const dbSourceType = SOURCE_TYPE_MAPPING[selectedSourceTypes[0]];
+    const validCombination = sourceCombinations[dbSourceType];
+    
+    if (!validCombination) {
+        console.warn('No valid combination found for:', dbSourceType);
+        return;
+    }
+    
+    console.log('Valid combination:', validCombination);
+    
+    // Filter Mode dropdown
+    filterDropdown(modeDropdown, validCombination.modes);
+    
+    // Filter Variety dropdown
+    filterDropdown(varietyDropdown, validCombination.varieties);
+    
     updateAddButtonState();
-});
+}
+
+// Helper function to filter a dropdown
+function filterDropdown(dropdown, validValues) {
+    Array.from(dropdown.options).forEach(option => {
+        if (option.value === '') {
+            option.disabled = false;
+            option.style.display = '';
+            option.style.opacity = '1';  
+            option.style.color = ''; 
+            return;
+        }
+        
+        const isValid = validValues.includes(option.value);
+        option.disabled = !isValid;
+        option.style.display = isValid ? '' : 'none';
+        option.style.display = '';
+        
+        // Deselect if currently selected but not valid
+        if (!isValid) {
+            option.style.opacity = '0.4';  // Make it look grayed out
+            option.style.color = '#888';   // Gray text color
+        } else {
+            option.style.opacity = '1';    // Normal opacity
+            option.style.color = '';       // Normal color
+        }
+        
+        // Deselect if currently selected but not valid
+        if (!isValid && option.selected) {
+            option.selected = false;
+        }
+    });
+}
+
+// Helper function to reset a dropdown
+function resetDropdown(dropdown) {
+    Array.from(dropdown.options).forEach(option => {
+        option.disabled = option.value === '';
+        option.style.display = '';
+        option.style.opacity = '1';    // ✅ NEW: Reset opacity
+        option.style.color = '';
+        option.selected = false;
+    });
+}
+
+// Attach event listener to source type dropdown
+sourceTypeDropdown.addEventListener('change', filterDropdownOptions);
 
 // Enable/disable Add button when selections are made
 function updateAddButtonState() {
@@ -561,6 +1161,8 @@ function updateAddButtonState() {
 sourceTypeDropdown.addEventListener('change', updateAddButtonState);
 modeDropdown.addEventListener('change', updateAddButtonState);
 varietyDropdown.addEventListener('change', updateAddButtonState);
+
+// ... rest of your existing code (getSelectedValues, add row functionality, etc.)
 
 // Get selected values from multi-select dropdowns
 function getSelectedValues(selectElement) {
@@ -772,192 +1374,6 @@ if (resetButton) {
 
 
 // Final Go Button - Submit configuration
-
-// const finalGoButton = document.getElementById('finalGoButton');
-// if (finalGoButton) {
-//     finalGoButton.addEventListener('click', function() {
-//         // Collect all form data
-//         const formData = {
-//             country: document.getElementById('Country').value,
-//             cloudStack: document.getElementById('cloudStack').value,
-//             wellDefined: document.getElementById('Welldefined').value,
-//             involvesML: document.getElementById('involvesML').value,
-//             unstructuredData: document.getElementById('unstructuredData').value,
-//             storageSolution: document.getElementById('storagesolution').value,
-//             technologies: selectedStack,
-//             sourceDetails: sourceDetailsData
-//         };
-
-//         // Log the submission (in a real app, this would send to backend)
-//         console.log('Configuration Submitted:', formData);
-
-
-// const finalGoButton = document.getElementById('finalGoButton');
-// if (finalGoButton) {
-//     finalGoButton.addEventListener('click', function() {
-//         // Collect all form data
-//         const formData = {
-//             country: document.getElementById('Country').value,
-//             cloudStack: document.getElementById('cloudStack').value,
-//             wellDefined: document.getElementById('Welldefined').value,
-//             involvesML: document.getElementById('involvesML').value,
-//             unstructuredData: document.getElementById('unstructuredData').value,
-//             storageSolution: document.getElementById('storagesolution').value,
-//             technologies: selectedStack,
-//             sourceDetails: sourceDetailsData
-//         };
-
-//         // Log the submission (in a real app, this would send to backend)
-//         console.log('Configuration Submitted:', formData);
-//         console.log('Cloud Stack:', formData.cloudStack);
-//         console.log('Storage Solution:', formData.storageSolution);
-//     })};
-
-// const finalGoButton = document.getElementById('finalGoButton');
-// if (finalGoButton) {
-//     finalGoButton.addEventListener('click', function() {
-//         // Collect all form data
-//         const formData = {
-//             country: document.getElementById('Country').value,
-//             cloudStack: document.getElementById('cloudStack').value,
-//             wellDefined: document.getElementById('Welldefined').value,
-//             involvesML: document.getElementById('involvesML').value,
-//             unstructuredData: document.getElementById('unstructuredData').value,
-//             storageSolution: document.getElementById('storagesolution').value,
-//             technologies: selectedStack,
-//             sourceDetails: sourceDetailsData
-//         };
-
-//         // Log to console
-//         console.log('===================');
-//         console.log('Configuration Submitted:', formData);
-//         console.log('Cloud Stack:', formData.cloudStack);
-//         console.log('Storage Solution:', formData.storageSolution);
-//         console.log('===================');
-
-//         // Provide visual feedback
-//         const originalText = finalGoButton.textContent;
-//         finalGoButton.textContent = '✓ Submitted';
-//         finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
-        
-//         setTimeout(() => {
-//             finalGoButton.textContent = originalText;
-//             finalGoButton.style.background = '';
-//         }, 2000);
-//     });
-// }
-
-//Final API populating results
-// function populateAPIResultsTable(data) {
-//     const apiResultsBody = document.getElementById('apiResultsBody');
-//     apiResultsBody.innerHTML = '';
-
-//     if (!data || data.length === 0) {
-//         const tr = document.createElement('tr');
-//         tr.innerHTML = '<td colspan="6" style="text-align: center; padding: 20px;">No results found</td>';
-//         apiResultsBody.appendChild(tr);
-//         return;
-//     }
-
-//     data.forEach((item, index) => {
-//         const tr = document.createElement('tr');
-//         tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
-        
-//         tr.innerHTML = `
-//             <td>${item.cloud || 'N/A'}</td>
-//             <td>${item.service || 'N/A'}</td>
-//             <td>${item.tool || 'N/A'}</td>
-//             <td>${item.description || 'N/A'}</td>
-//             <td>${item.mode || 'N/A'}</td>
-//             <td>${item.source_type || 'N/A'}</td>
-//         `;
-        
-//         apiResultsBody.appendChild(tr);
-//     });
-// }
-
-// const finalGoButton = document.getElementById('finalGoButton');
-// if (finalGoButton) {
-//     finalGoButton.addEventListener('click', async function() {
-//         // Collect all form data
-//         const formData = {
-//             country: document.getElementById('Country').value,
-//             cloudStack: document.getElementById('cloudStack').value,
-//             wellDefined: document.getElementById('Welldefined').value,
-//             involvesML: document.getElementById('involvesML').value,
-//             unstructuredData: document.getElementById('unstructuredData').value,
-//             storageSolution: document.getElementById('storagesolution').value,
-//             technologies: selectedStack,
-//             sourceDetails: sourceDetailsData
-//         };
-
-//         // Get selected cloud from dropdown
-//         const cloudValue = document.getElementById("cloudStack").value;
-
-//         if (!cloudValue) {
-//             alert("Please select a Cloud Stack first!");
-//             return;
-//         }
-
-//         // Log to console
-//         console.log('===================');
-//         console.log('Configuration Submitted:', formData);
-//         console.log('Cloud Stack:', formData.cloudStack);
-//         console.log('Storage Solution:', formData.storageSolution);
-//         console.log('===================');
-
-//         // Provide visual feedback
-//         const originalText = finalGoButton.textContent;
-//         finalGoButton.textContent = '⏳ Fetching Results...';
-//         finalGoButton.disabled = true;
-
-//         try {
-//             // Call Flask API with cloud input
-//             const response = await fetch(
-//                 `http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`
-//             );
-
-//             if (!response.ok) {
-//                 throw new Error(`HTTP error! status: ${response.status}`);
-//             }
-
-//             const data = await response.json();
-
-//             console.log("Tech Stack Results:", data);
-
-//             // Populate the table with results
-//             populateAPIResultsTable(data);
-
-//             // Show the results container
-//             const apiResultsContainer = document.getElementById('apiResultsContainer');
-//             apiResultsContainer.classList.add('show');
-
-//             // Scroll to results
-//             setTimeout(() => {
-//                 apiResultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-//             }, 300);
-
-//             // Success feedback
-//             finalGoButton.textContent = '✓ Results Loaded';
-//             finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
-            
-//         } catch (error) {
-//             console.error("Error fetching data:", error);
-//             alert("Backend error. Please check console and make sure the server is running.");
-            
-//             finalGoButton.textContent = originalText;
-//             finalGoButton.style.background = '';
-//         } finally {
-//             setTimeout(() => {
-//                 finalGoButton.textContent = originalText;
-//                 finalGoButton.style.background = '';
-//                 finalGoButton.disabled = false;
-//             }, 2000);
-//         }
-//     });
-// }
-
-
 
 // ===== FIX FOR API RESULTS TABLE =====
 
@@ -1290,11 +1706,99 @@ if (closeMlResultsBtn) {
     });
 }
 
-// ================================
-// STORAGE SOLUTION AUTO-SELECTION (CORRECTED & FINAL)
-// ================================
-document.addEventListener('DOMContentLoaded', function() {
+
+// document.addEventListener('DOMContentLoaded', function() {
     
+//     const wellDefined = document.getElementById('Welldefined');
+//     const involvesML = document.getElementById('involvesML');
+//     const unstructuredData = document.getElementById('unstructuredData');
+//     const storageSolution = document.getElementById('storagesolution');
+//     const storageCheckmark = document.getElementById('check6');
+
+//     if (!wellDefined || !involvesML || !unstructuredData || !storageSolution) {
+//         console.warn('Storage rule dropdowns not found');
+//         return;
+//     }
+
+//     // Set default values
+//     wellDefined.value = 'Yes';
+//     involvesML.value = 'No';
+//     unstructuredData.value = 'No';
+    // ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
+// async function loadCloudProviders() {
+//     try {
+//         console.log('📡 Fetching cloud providers from database...');
+        
+//         const response = await fetch('http://127.0.0.1:5000/api/cloud');
+        
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+        
+//         const cloudProviders = await response.json();
+//         const cloudDropdown = document.getElementById('cloudStack');
+        
+//         if (!cloudDropdown) {
+//             console.error('❌ Cloud dropdown not found');
+//             return;
+//         }
+        
+//         // Clear and populate
+//         cloudDropdown.innerHTML = '<option value="">Select Cloud Stack</option>';
+        
+//         cloudProviders.forEach(cloud => {
+//             const option = document.createElement('option');
+//             option.value = cloud;
+//             option.textContent = cloud;
+//             cloudDropdown.appendChild(option);
+//         });
+        
+//         console.log(`✅ Loaded ${cloudProviders.length} cloud providers:`, cloudProviders);
+        
+//     } catch (error) {
+//         console.error('❌ Error loading cloud providers:', error);
+        
+//         const cloudDropdown = document.getElementById('cloudStack');
+//         if (cloudDropdown) {
+//             cloudDropdown.innerHTML = `
+//                 <option value="">Select Cloud Stack</option>
+//                 <option value="AWS">AWS</option>
+//                 <option value="Azure">Azure</option>
+//                 <option value="GCP">GCP</option>
+//             `;
+//             console.warn('⚠️ Using fallback cloud providers');
+//         }
+//     }
+// }
+
+// // ===== LOAD TECHNOLOGIES FROM DATABASE =====
+// async function loadAvailableTechnologies() {
+//     // ... your existing code
+// }
+
+// // ===== INITIALIZE ON PAGE LOAD =====
+// document.addEventListener('DOMContentLoaded', async function() {
+    
+//     // Load data from database
+//     await loadCloudProviders();
+//     await loadAvailableTechnologies();
+    
+//     // Existing storage rules code
+//     const wellDefined = document.getElementById('Welldefined');
+//     const involvesML = document.getElementById('involvesML');
+//     const unstructuredData = document.getElementById('unstructuredData');
+//     const storageSolution = document.getElementById('storagesolution');
+
+//     // ... rest of your existing code
+// });
+document.addEventListener('DOMContentLoaded', async function() {
+    
+    // 🆕 Load cloud providers and technologies from database FIRST
+    await loadCountries()
+    await loadCloudProviders();
+    await loadAvailableTechnologies();
+    await loadSourceCombinations();
+    // Then handle storage rules
     const wellDefined = document.getElementById('Welldefined');
     const involvesML = document.getElementById('involvesML');
     const unstructuredData = document.getElementById('unstructuredData');
@@ -1311,6 +1815,47 @@ document.addEventListener('DOMContentLoaded', function() {
     involvesML.value = 'No';
     unstructuredData.value = 'No';
 
+    function updateStorageDecision() {
+        console.log('Storage Decision Inputs:', {
+            wellDefined: wellDefined.value,
+            involvesML: involvesML.value,
+            unstructuredData: unstructuredData.value
+        });
+
+        if (
+            wellDefined.value === 'Yes' &&
+            involvesML.value === 'No' &&
+            unstructuredData.value === 'No'
+        ) {
+            storageSolution.value = 'Data Warehouse';
+            console.log('✓ Storage Decision: Data Warehouse');
+        } else {
+            storageSolution.value = 'Data Lake';
+            console.log('✓ Storage Decision: Data Lake');
+        }
+        
+        if (storageCheckmark) {
+            storageCheckmark.classList.add('show');
+        }
+        
+        if (wellDefined.value) {
+            document.getElementById('check3')?.classList.add('show');
+        }
+        if (involvesML.value) {
+            document.getElementById('check4')?.classList.add('show');
+        }
+        
+        updateProgress();
+    }
+
+    // Initial update
+    updateStorageDecision();
+
+    // Listen to dependency changes
+    wellDefined.addEventListener('change', updateStorageDecision);
+    involvesML.addEventListener('change', updateStorageDecision);
+    unstructuredData.addEventListener('change', updateStorageDecision);
+});
     function updateStorageDecision() {
         console.log('Storage Decision Inputs:', {
             wellDefined: wellDefined.value,
@@ -1358,35 +1903,6 @@ document.addEventListener('DOMContentLoaded', function() {
     involvesML.addEventListener('change', updateStorageDecision);
     unstructuredData.addEventListener('change', updateStorageDecision);
 
-});
 
-// finalGoButton.addEventListener("click", async function () {
 
-//     // ✅ Get selected cloud from dropdown
-//     const cloudValue = document.getElementById("cloudStack").value;
 
-//     if (!cloudValue) {
-//         alert("Please select a Cloud Stack first!");
-//         return;
-//     }
-
-//     console.log("Selected Cloud:", cloudValue);
-
-//     try {
-//         // ✅ Call Flask API with cloud input
-//         const response = await fetch(
-//             `http://127.0.0.1:5000/api/techstack?cloud=${cloudValue}`
-//         );
-
-//         const data = await response.json();
-
-//         console.log("Tech Stack Results:", data);
-
-//         // ✅ Display results in browser (simple testing)
-//         alert("Rows returned: " + data.length);
-
-//     } catch (error) {
-//         console.error("Error fetching data:", error);
-//         alert("Backend error. Check console.");
-//     }
-// });
