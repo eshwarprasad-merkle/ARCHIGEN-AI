@@ -14,6 +14,87 @@ let selectedStack = [];
 // Reset all form fields on page load
 selectedStack = [];
 
+// Business Rules for Source Details
+const SOURCE_RULES = {
+    'File': {
+        modes: ['Batch', 'Real-Time', 'Near Real-Time'],
+        varieties: ['Semi-Structured', 'Un-Structured']
+    },
+    'Database': {
+        modes: ['Batch', 'Real-Time', 'Near Real-Time'],
+        varieties: ['Semi-Structured', 'Structured']
+    },
+    'API Call': {
+        modes: ['Batch'],
+        varieties: ['Semi-Structured']
+    },
+    'API Publisher': {
+        modes: ['Real-Time'],
+        varieties: ['Semi-Structured']
+    },
+    'IOT': {
+        modes: ['Real-Time'],
+        varieties: ['Semi-Structured', 'Un-Structured']
+    }
+};
+
+// Helper function to disable/enable options
+function filterDropdownOptions(dropdownId, allowedValues) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+
+    Array.from(dropdown.options).forEach(option => {
+        if (option.value === "") return; // Skip placeholder
+        
+        const isAllowed = allowedValues.includes(option.value);
+        option.disabled = !isAllowed;
+        
+        // Visual styling: Gray out disabled items
+        option.style.color = isAllowed ? "" : "#ccc";
+        
+        // Auto-deselect if the user had it selected but it's now forbidden
+        if (!isAllowed && option.selected) {
+            option.selected = false;
+        }
+    });
+}
+
+// Function triggered on Source Type change
+function applySourceRules() {
+    const sourceDropdown = document.getElementById('sourceTypeDropdown');
+    const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
+    
+    // If nothing selected, enable all (default state)
+    if (selectedSourceTypes.length === 0) {
+        enableAllOptions('modeDropdown');
+        enableAllOptions('varietyDropdown');
+        return;
+    }
+
+    let allowedModes = [];
+    let allowedVarieties = [];
+
+    // Combine rules for all selected source types
+    selectedSourceTypes.forEach(source => {
+        if (SOURCE_RULES[source]) {
+            allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
+            allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
+        }
+    });
+
+    filterDropdownOptions('modeDropdown', allowedModes);
+    filterDropdownOptions('varietyDropdown', allowedVarieties);
+}
+
+function enableAllOptions(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+    Array.from(dropdown.options).forEach(opt => {
+        opt.disabled = false;
+        opt.style.color = "";
+    });
+}
+
 if (progressFill) {
     progressFill.style.width = '0%';
     progressFill.style.background = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
@@ -298,25 +379,28 @@ async function loadCountries() {
     } catch (error) {
         console.error('❌ Error loading countries:', error);
         
-        const countryDropdown = document.getElementById('Country');
-        if (countryDropdown) {
-            countryDropdown.innerHTML = `
-                <option value="">Select Country</option>
-                <option value="India">India</option>
-                <option value="USA">USA</option>
-                <option value="UK">UK</option>
-            `;
+        // const countryDropdown = document.getElementById('Country');
+        // if (countryDropdown) {
+        //     countryDropdown.innerHTML = `
+        //         <option value="">Select Country</option>
+        //         <option value="India">India</option>
+        //         <option value="USA">USA</option>
+        //         <option value="UK">UK</option>
+        //     `;
             console.warn('⚠️ Using fallback country list');
         }
     }
-}
+
+
+// ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
 
 // ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
 async function loadCloudProviders() {
     try {
-        console.log('📡 Fetching cloud providers from database...');
+        console.log('📡 Fetching cloud providers from app_config table...');
         
-        const response = await fetch('http://127.0.0.1:5000/api/cloud');
+        // We call the generic config endpoint with split=true to get ["AWS", "Azure", "GCP"]
+        const response = await fetch('http://127.0.0.1:5000/api/config?key=CLOUD&split=true');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -326,12 +410,14 @@ async function loadCloudProviders() {
         const cloudDropdown = document.getElementById('cloudStack');
         
         if (!cloudDropdown) {
-            console.error('❌ Cloud dropdown not found');
+            console.error('❌ Cloud dropdown (id="cloudStack") not found in HTML');
             return;
         }
         
+        // Clear existing and add placeholder
         cloudDropdown.innerHTML = '<option value="">Select Cloud Stack</option>';
         
+        // Populate with database values
         cloudProviders.forEach(cloud => {
             const option = document.createElement('option');
             option.value = cloud;
@@ -339,261 +425,18 @@ async function loadCloudProviders() {
             cloudDropdown.appendChild(option);
         });
         
-        console.log(`✅ Loaded ${cloudProviders.length} cloud providers:`, cloudProviders);
+        console.log(`✅ Successfully loaded ${cloudProviders.length} cloud providers from DB`);
         
     } catch (error) {
         console.error('❌ Error loading cloud providers:', error);
         
-        const cloudDropdown = document.getElementById('cloudStack');
-        if (cloudDropdown) {
-            cloudDropdown.innerHTML = `
-                <option value="">Select Cloud Stack</option>
-                <option value="AWS">AWS</option>
-                <option value="Azure">Azure</option>
-                <option value="GCP">GCP</option>
-            `;
-            console.warn('⚠️ Using fallback cloud providers');
-        }
+        // Fallback UI handling
+        // const cloudDropdown = document.getElementById('cloudStack');
+        // if (cloudDropdown && cloudDropdown.options.length <= 1) {
+        //     cloudDropdown.innerHTML += '<option value="AWS">AWS (Fallback)</option><option value="Azure">Azure (Fallback)</option>';
+        // }
     }
 }
-
-// ===== 🆕 LOAD COUNTRIES FROM DATABASE =====
-
-
-// ===== TECH STACK SELECTION FUNCTIONALITY =====
-
-// Available technologies for autocomplete
-// const availableTechs = [
-//     'Apache Spark',
-//     'Apache Kafka',
-//     'Apache Airflow',
-//     'Hadoop',
-//     'Python',
-//     'Scala',
-//     'SQL',
-//     'Docker',
-//     'Kubernetes',
-//     'PostgreSQL',
-//     'MongoDB',
-//     'Redis',
-//     'Databricks',
-//     'Glue',
-//     'EMR',
-//     'AWS Batch',
-//     'AWS Data Pipeline',
-//     'Lake Formation',
-//     'Athena ETL',
-//     'Flink on Kinesis',
-//     'Data Factory',
-//     'Synapse Dataflow',
-//     'SSIS',
-//     'Azure Stream Analytics',
-//     'Fabric Pipelines',
-//     'Dataproc',
-//     'Dataflow',
-//     'Cloud Composer Operators',
-//     'Vertex AI Pipelines',
-//     'Flink on Dataflow',
-//     'Databricks Delta Lake',
-//     'Apache NiFi',
-//     'Apache Beam',
-//     'Talend',
-//     'Informatica',
-//     'KNIME',
-//     'RapidMiner',
-//     'TensorFlow',
-//     'PyTorch',
-//     'Scikit-learn',
-//     'Java',
-//     'JavaScript',
-//     'Node.js',
-//     'Spring Boot',
-//     'FastAPI',
-//     'GraphQL',
-//     'REST',
-//     'gRPC'
-// ];
-
-// const techInputsContainer = document.getElementById('techInputs');
-// let inputIndex = 0;
-
-// // Function to show suggestions dropdown
-// function showSuggestions(inputElement, suggestions) {
-//     const wrapper = inputElement.closest('.tech-input-wrapper');
-//     const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
-//     const suggestionsList = suggestionsDiv.querySelector('.suggestions-list');
-    
-//     if (!suggestions || suggestions.length === 0) {
-//         suggestionsDiv.style.display = 'none';
-//         return;
-//     }
-    
-//     suggestionsList.innerHTML = suggestions.map((tech, index) => `
-//         <li class="suggestion-item" data-tech="${tech}" data-index="${index}">${tech}</li>
-//     `).join('');
-    
-//     suggestionsDiv.style.display = 'block';
-    
-//     let highlightedIndex = -1;
-    
-//     // Add click handlers to suggestions
-//     suggestionsDiv.querySelectorAll('.suggestion-item').forEach((item, idx) => {
-//         item.addEventListener('click', function(e) {
-//             e.preventDefault();
-//             e.stopPropagation();
-//             const selectedTech = this.dataset.tech;
-//             addTechToStack(selectedTech, inputElement);
-//             suggestionsDiv.style.display = 'none';
-//         }, true);
-//     });
-    
-//     // Add keyboard navigation
-//     const keydownHandler = function(e) {
-//         const items = suggestionsDiv.querySelectorAll('.suggestion-item');
-//         const itemCount = items.length;
-        
-//         if (e.key === 'ArrowDown') {
-//             e.preventDefault();
-//             highlightedIndex = (highlightedIndex + 1) % itemCount;
-//             updateHighlight();
-//         } else if (e.key === 'ArrowUp') {
-//             e.preventDefault();
-//             highlightedIndex = highlightedIndex <= 0 ? itemCount - 1 : highlightedIndex - 1;
-//             updateHighlight();
-//         } else if (e.key === 'Enter' && highlightedIndex >= 0) {
-//             e.preventDefault();
-//             const selectedItem = items[highlightedIndex];
-//             const selectedTech = selectedItem.dataset.tech;
-//             addTechToStack(selectedTech, inputElement);
-//             suggestionsDiv.style.display = 'none';
-//             inputElement.removeEventListener('keydown', keydownHandler);
-//         } else if (e.key === 'Escape') {
-//             e.preventDefault();
-//             suggestionsDiv.style.display = 'none';
-//             inputElement.removeEventListener('keydown', keydownHandler);
-//         }
-//     };
-    
-//     function updateHighlight() {
-//         const items = suggestionsDiv.querySelectorAll('.suggestion-item');
-//         items.forEach((item, idx) => {
-//             if (idx === highlightedIndex) {
-//                 item.classList.add('highlighted');
-//                 item.scrollIntoView({ block: 'nearest' });
-//             } else {
-//                 item.classList.remove('highlighted');
-//             }
-//         });
-//     }
-    
-//     inputElement.addEventListener('keydown', keydownHandler);
-// }
-
-// // Hide all suggestion dropdowns when clicking outside
-// document.addEventListener('click', function(e) {
-//     if (e.target.closest('.suggestion-item')) {
-//         return;
-//     }
-    
-//     if (!e.target.closest('.tech-input-wrapper')) {
-//         document.querySelectorAll('.tech-suggestions').forEach(div => {
-//             div.style.display = 'none';
-//         });
-//     }
-// }, false);
-
-// // Function to add technology to the selected stack
-// function addTechToStack(tech, inputElement) {
-//     const trimmedTech = tech.trim();
-    
-//     if (!trimmedTech) {
-//         return;
-//     }
-    
-//     // Check if tech is in the available list
-//     const validTech = availableTechs.find(t => t.toLowerCase() === trimmedTech.toLowerCase());
-    
-//     if (!validTech) {
-//         return;
-//     }
-    
-//     // Check if already added
-//     if (selectedStack.some(t => t.toLowerCase() === validTech.toLowerCase())) {
-//         return;
-//     }
-    
-//     selectedStack.push(validTech);
-//     inputElement.value = '';
-//     updateTechSummary();
-    
-//     // Hide suggestions
-//     const wrapper = inputElement.closest('.tech-input-wrapper');
-//     const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
-//     suggestionsDiv.style.display = 'none';
-// }
-
-// // Function to update the tech summary display
-// function updateTechSummary() {
-//     const techSummary = document.getElementById('techSummary');
-//     const count = selectedStack.length;
-    
-//     if (count === 0) {
-//         techSummary.textContent = '0 technologies';
-//     } else {
-//         techSummary.textContent = selectedStack.join(', ');
-//     }
-// }
-
-// // Function to filter suggestions based on input
-// function getFilteredSuggestions(query) {
-//     if (!query.trim()) return [];
-//     const lowerQuery = query.toLowerCase();
-//     return availableTechs.filter(tech => 
-//         tech.toLowerCase().includes(lowerQuery)
-//     ).slice(0, 8); // Limit to 8 suggestions
-// }
-
-// // Function to attach input listeners
-// function attachInputListeners(inputElement) {
-//     inputElement.addEventListener('input', function(e) {
-//         const query = this.value;
-//         const suggestions = getFilteredSuggestions(query);
-//         showSuggestions(this, suggestions);
-//     });
-    
-//     inputElement.addEventListener('keydown', function(e) {
-//         if (e.key === 'Enter') {
-//             e.preventDefault();
-//             const suggestions = getFilteredSuggestions(this.value);
-//             if (suggestions.length > 0) {
-//                 addTechToStack(suggestions[0], this);
-//                 const wrapper = this.closest('.tech-input-wrapper');
-//                 const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
-//                 suggestionsDiv.style.display = 'none';
-//             }
-//         }
-//     });
-    
-//     inputElement.addEventListener('blur', function(e) {
-//         const wrapper = this.closest('.tech-input-wrapper');
-//         const suggestionsDiv = wrapper.querySelector('.tech-suggestions');
-//         suggestionsDiv.style.display = 'none';
-//     });
-// }
-
-// // Attach listeners to initial input
-// const techInputElements = document.querySelectorAll('.tech-input-group');
-
-// document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
-//     const input = group.querySelector('.tech-input');
-//     if (input) {
-//         attachInputListeners(input);
-//     }
-// });
-
-
-
-
 
 // ===== TECH STACK SELECTION FUNCTIONALITY =====
 
@@ -646,110 +489,7 @@ async function loadAvailableTechnologies() {
         return availableTechs;
     }
 }
-// Load available technologies from backend
-// async function loadAvailableTechnologies() {
-//     if (technologiesLoaded) {
-//         return availableTechs;
-//     }
-    
-//     try {
-//         console.log('📡 Fetching available technologies from database...');
-        
-//         const response = await fetch('http://127.0.0.1:5000/api/technologies');
-        
-//         if (!response.ok) {
-//             throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-        
-//         const data = await response.json();
-        
-//         // Data is already a simple array of tech names
-//         availableTechs = data;
-//         technologiesLoaded = true;
-        
-//         console.log(`✅ Loaded ${availableTechs.length} technologies from database`);
-//         console.log('Sample technologies:', availableTechs.slice(0, 5));
-        
-//         return availableTechs;
-        
-//     } catch (error) {
-//         console.error('❌ Error loading technologies:', error);
-        
-//         // Fallback to minimal set if database fails
-//         availableTechs = [
-//             'Apache Spark',
-//             'Apache Kafka',
-//             'Apache Airflow',
-//             'Python',
-//             'SQL',
-//             'Docker',
-//             'Kubernetes'
-//         ];
-        
-//         console.warn('⚠️ Using fallback technology list');
-//         technologiesLoaded = true;
-//         return availableTechs;
-//     }
-// }
 
-// @app.route('/api/technologies', methods=['GET'])
-// def get_technologies():
-//     try:
-//         cursor = conn.cursor()
-        
-//         # Get distinct technology names, filtering out NULLs
-//         query = """
-//             SELECT DISTINCT tool
-//             FROM your_table_name 
-//             WHERE tool_name IS NOT NULL
-//             ORDER BY tool_name
-//         """
-        
-//         cursor.execute(query)
-//         rows = cursor.fetchall()
-        
-//         # Extract just the tool names into a simple list
-//         technologies = [row[0] for row in rows]
-        
-//         print(f"✅ Returning {len(technologies)} technologies")
-        
-//         return jsonify(technologies)
-    
-//     except Exception as e:
-//         print(f"❌ Error in /api/technologies: {e}")
-//         import traceback
-//         traceback.print_exc()
-//         return jsonify({'error': str(e)}), 500
-// @app.route('/api/technologies', methods=['GET'])
-// def get_technologies():
-//     try:
-//         cursor = conn.cursor()
-        
-//         # Replace 'tech_stack' with your actual table name
-//         # Replace 'description' with the actual column name containing tool names
-//         query = """
-//             SELECT DISTINCT description
-//             FROM tech_stack 
-//             WHERE description IS NOT NULL
-//             ORDER BY description
-//         """
-        
-//         cursor.execute(query)
-//         rows = cursor.fetchall()
-        
-//         # Extract just the tool names into a simple list
-//         technologies = [row[0] for row in rows]
-        
-//         print(f"✅ Returning {len(technologies)} technologies")
-        
-//         return jsonify(technologies)
-    
-//     except Exception as e:
-//         print(f"❌ Error in /api/technologies: {e}")
-//         import traceback
-//         traceback.print_exc()
-//         return jsonify({'error': str(e)}), 500
-// Initialize technologies when page loads
 window.addEventListener('DOMContentLoaded', async function() {
     // Load technologies from database on page load
     await loadAvailableTechnologies();
@@ -940,318 +680,76 @@ document.querySelectorAll('.tech-input-group').forEach((group, idx) => {
 
 // ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
 
-// const sourceTypeDropdown = document.getElementById('sourceTypeDropdown');
-// const modeDropdown = document.getElementById('modeDropdown');
-// const varietyDropdown = document.getElementById('varietyDropdown');
-// const addRowBtn = document.getElementById('addRowBtn');
-// const sourceTableBody = document.getElementById('sourceTableBody');
-// const sourceDetailsContainer = document.getElementById('sourceDetailsContainer');
-// let sourceDetailsData = [];
-
-// // Auto-select Mode based on Source Type
-// sourceTypeDropdown.addEventListener('change', function() {
-//     const selectedSourceTypes = Array.from(this.selectedOptions).map(opt => opt.value);
+function populateDropdown(elementId, data, placeholder, isMultiple = false) {
+    const el = document.getElementById(elementId);
+    if (!el) {
+        console.error(`Element ${elementId} not found`);
+        return;
+    }
     
-//     // Get mode options
-//     const batchOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Batch');
-//     const realtimeOption = Array.from(modeDropdown.options).find(opt => opt.value === 'Real-Time');
+    // Clear existing
+    el.innerHTML = '';
     
-//     // Reset mode first
-//     modeDropdown.selectedIndex = -1;
-    
-//     // Auto-select and disable based on source type
-//     if (selectedSourceTypes.includes('API Call')) {
-//         // For API Call: Select Batch, disable Real-Time
-//         if (batchOption) {
-//             batchOption.selected = true;
-//             batchOption.disabled = false;
-//         }
-//         if (realtimeOption) {
-//             realtimeOption.selected = false;
-//             realtimeOption.disabled = true;
-//         }
-//     } else if (selectedSourceTypes.includes('API Publisher') || selectedSourceTypes.includes('IOT')) {
-//         // For API Publisher or IOT: Select Real-Time, disable Batch
-//         if (realtimeOption) {
-//             realtimeOption.selected = true;
-//             realtimeOption.disabled = false;
-//         }
-//         if (batchOption) {
-//             batchOption.selected = false;
-//             batchOption.disabled = true;
-//         }
-//     } else {
-//         // For other source types: Enable both modes
-//         if (batchOption) {
-//             batchOption.disabled = false;
-//         }
-//         if (realtimeOption) {
-//             realtimeOption.disabled = false;
-//         }
-//     }
-    
-//     updateAddButtonState();
-// });
+    // Add placeholder only for single select
+    if (!isMultiple) {
+        const entry = document.createElement('option');
+        entry.value = "";
+        entry.textContent = placeholder;
+        el.appendChild(entry);
+    }
 
-// // Enable/disable Add button when selections are made
-// function updateAddButtonState() {
-//     const hasSourceType = sourceTypeDropdown.selectedOptions.length > 0;
-//     const hasMode = modeDropdown.selectedOptions.length > 0;
-//     const hasVariety = varietyDropdown.selectedOptions.length > 0;
-//     addRowBtn.disabled = !(hasSourceType && hasMode && hasVariety);
-// }
+    data.forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        el.appendChild(opt);
+    });
+    console.log(`✅ Populated ${elementId} with ${data.length} items`);
+}
 
-// sourceTypeDropdown.addEventListener('change', updateAddButtonState);
-// modeDropdown.addEventListener('change', updateAddButtonState);
-// varietyDropdown.addEventListener('change', updateAddButtonState);
-
-
-// ===== SOURCE DETAILS SECTION FUNCTIONALITY =====
-
-const sourceTypeDropdown = document.getElementById('sourceTypeDropdown');
-const modeDropdown = document.getElementById('modeDropdown');
-const varietyDropdown = document.getElementById('varietyDropdown');
-const addRowBtn = document.getElementById('addRowBtn');
-const sourceTableBody = document.getElementById('sourceTableBody');
-const sourceDetailsContainer = document.getElementById('sourceDetailsContainer');
-let sourceDetailsData = [];
-let sourceCombinations = {}; // Store valid combinations from database
-
-// Map frontend display names to database values
-const SOURCE_TYPE_MAPPING = {
-    'On-Prem File': 'File',
-    'On-Prem Database': 'Database',
-    'API Call': 'API call',
-    'API Publisher': 'API Publisher',
-    'IOT': 'IOT'
-};
-
-// ===== LOAD SOURCE COMBINATIONS FROM DATABASE =====
-async function loadSourceCombinations() {
+async function loadSourceTypes() {
     try {
-        console.log('📡 Fetching source combinations from database...');
-        
-        const response = await fetch('http://127.0.0.1:5000/api/source-combinations');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        sourceCombinations = await response.json();
-        console.log('✅ Loaded source combinations:', sourceCombinations);
-        
-    } catch (error) {
-        console.error('❌ Error loading source combinations:', error);
-        
-        // Fallback to hardcoded rules if database fails
-        sourceCombinations = {
-            'File': {
-                modes: ['Batch', 'Real-time'],
-                varieties: ['Semi-Structured', 'Unstructured']
-            },
-            'Database': {
-                modes: ['Batch', 'Real-time'],
-                varieties: ['Structured', 'Semi-Structured']
-            },
-            'API call': {
-                modes: ['Batch'],
-                varieties: ['Semi-Structured']
-            },
-            'API Publisher': {
-                modes: ['Real-time'],
-                varieties: ['Semi-Structured']
-            },
-            'IOT': {
-                modes: ['Real-time'],
-                varieties: ['Semi-Structured', 'Unstructured']
-            }
-        };
-        console.warn('⚠️ Using fallback source combinations');
-    }
+        const response = await fetch('http://127.0.0.1:5000/api/config?key=SOURCE_TYPE&split=true');
+        const data = await response.json();
+        // Passing 'true' because your HTML uses 'multiple'
+        populateDropdown('sourceTypeDropdown', data, 'Select Source Type', true);
+    } catch (e) { console.error("Error loading Source Types", e); }
 }
 
-// ===== FILTER DROPDOWNS BASED ON SOURCE TYPE SELECTION =====
-function filterDropdownOptions() {
-    const selectedSourceTypes = Array.from(sourceTypeDropdown.selectedOptions).map(opt => opt.value);
-    
-    console.log('Selected source types:', selectedSourceTypes);
-    
-    // If no source type selected, disable mode and variety
-    if (selectedSourceTypes.length === 0) {
-        resetDropdown(modeDropdown);
-        resetDropdown(varietyDropdown);
-        updateAddButtonState();
-        return;
-    }
-    
-    // Get the database value for selected source type (use first selection if multiple)
-    const dbSourceType = SOURCE_TYPE_MAPPING[selectedSourceTypes[0]];
-    const validCombination = sourceCombinations[dbSourceType];
-    
-    if (!validCombination) {
-        console.warn('No valid combination found for:', dbSourceType);
-        return;
-    }
-    
-    console.log('Valid combination:', validCombination);
-    
-    // Filter Mode dropdown
-    filterDropdown(modeDropdown, validCombination.modes);
-    
-    // Filter Variety dropdown
-    filterDropdown(varietyDropdown, validCombination.varieties);
-    
-    updateAddButtonState();
+async function loadSourceModes() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/config?key=SOURCE_MODE&split=true');
+        const data = await response.json();
+        populateDropdown('modeDropdown', data, 'Select Mode', true);
+    } catch (e) { console.error("Error loading Source Modes", e); }
 }
 
-// Helper function to filter a dropdown
-function filterDropdown(dropdown, validValues) {
-    Array.from(dropdown.options).forEach(option => {
-        if (option.value === '') {
-            option.disabled = false;
-            option.style.display = '';
-            option.style.opacity = '1';  
-            option.style.color = ''; 
-            return;
-        }
-        
-        const isValid = validValues.includes(option.value);
-        option.disabled = !isValid;
-        option.style.display = isValid ? '' : 'none';
-        option.style.display = '';
-        
-        // Deselect if currently selected but not valid
-        if (!isValid) {
-            option.style.opacity = '0.4';  // Make it look grayed out
-            option.style.color = '#888';   // Gray text color
-        } else {
-            option.style.opacity = '1';    // Normal opacity
-            option.style.color = '';       // Normal color
-        }
-        
-        // Deselect if currently selected but not valid
-        if (!isValid && option.selected) {
-            option.selected = false;
-        }
-    });
+async function loadSourceVarieties() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/config?key=SOURCE_VARIETY&split=true');
+        const data = await response.json();
+        populateDropdown('varietyDropdown', data, 'Select Variety', true);
+    } catch (e) { console.error("Error loading Source Varieties", e); }
 }
 
-// Helper function to reset a dropdown
-function resetDropdown(dropdown) {
-    Array.from(dropdown.options).forEach(option => {
-        option.disabled = option.value === '';
-        option.style.display = '';
-        option.style.opacity = '1';    // ✅ NEW: Reset opacity
-        option.style.color = '';
-        option.selected = false;
-    });
-}
-
-// Attach event listener to source type dropdown
-sourceTypeDropdown.addEventListener('change', filterDropdownOptions);
-
-// Enable/disable Add button when selections are made
-function updateAddButtonState() {
-    const hasSourceType = sourceTypeDropdown.selectedOptions.length > 0;
-    const hasMode = modeDropdown.selectedOptions.length > 0;
-    const hasVariety = varietyDropdown.selectedOptions.length > 0;
-    addRowBtn.disabled = !(hasSourceType && hasMode && hasVariety);
-}
-
-sourceTypeDropdown.addEventListener('change', updateAddButtonState);
-modeDropdown.addEventListener('change', updateAddButtonState);
-varietyDropdown.addEventListener('change', updateAddButtonState);
-
-// ... rest of your existing code (getSelectedValues, add row functionality, etc.)
-
-// Get selected values from multi-select dropdowns
-function getSelectedValues(selectElement) {
-    return Array.from(selectElement.selectedOptions).map(option => option.value);
-}
-
-// Add row to source details table
-addRowBtn.addEventListener('click', function() {
-    const sourceTypes = getSelectedValues(sourceTypeDropdown);
-    const modes = getSelectedValues(modeDropdown);
-    const varieties = getSelectedValues(varietyDropdown);
-
-    // Create combinations of all selected options
-    const combinations = [];
-    for (let sourceType of sourceTypes) {
-        for (let mode of modes) {
-            for (let variety of varieties) {
-                combinations.push({
-                    sourceType: sourceType,
-                    mode: mode,
-                    variety: variety
-                });
-            }
-        }
-    }
-
-    // Add combinations to data array
-    combinations.forEach(combo => {
-        sourceDetailsData.push(combo);
-    });
-
-    // Update table display
-    updateSourceDetailsTable();
-
-    // Show success feedback
-    const originalBtn = addRowBtn.textContent;
-    addRowBtn.textContent = '✓ Added!';
-    addRowBtn.style.background = 'rgba(0, 255, 136, 0.15)';
-    addRowBtn.style.color = '#00ff88';
+// Update your DOMContentLoaded to include all these calls
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("🚀 Initializing Application...");
     
-    setTimeout(() => {
-        addRowBtn.textContent = originalBtn;
-        addRowBtn.style.background = 'rgba(102, 126, 234, 0.15)';
-        addRowBtn.style.color = '#667eea';
-    }, 1000);
+    // Parallel load for efficiency
+    await Promise.all([
+        loadCountries(),
+        loadCloudProviders(),
+        loadAvailableTechnologies(),
+        loadSourceTypes(),
+        loadSourceModes(),
+        loadSourceVarieties()
+    ]);
 
-    // Reset selections
-    sourceTypeDropdown.selectedIndex = -1;
-    modeDropdown.selectedIndex = -1;
-    varietyDropdown.selectedIndex = -1;
-    updateAddButtonState();
-
-    // Auto-show matrix when data is added
-    if (sourceDetailsData.length > 0) {
-        setTimeout(() => {
-            matrixContainer.classList.add('show');
-            matrixContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 500);
-    }
+    // Initial storage decision logic
+    updateStorageDecision(); 
 });
 
-// Update source details table display
-function updateSourceDetailsTable() {
-    sourceTableBody.innerHTML = sourceDetailsData.map((item, index) => `
-        <tr data-index="${index}" style="animation: slideInScale 0.3s ease;">
-            <td>${item.sourceType}</td>
-            <td>${item.mode}</td>
-            <td>${item.variety}</td>
-            <td>
-                <button class="remove-source-row-btn" data-index="${index}" title="Remove this row">×</button>
-            </td>
-        </tr>
-    `).join('');
-
-    // Add event listeners to remove buttons
-    document.querySelectorAll('.remove-source-row-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const index = parseInt(this.dataset.index);
-            const row = this.closest('tr');
-            
-            // Fade out animation before removing
-            row.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
-                sourceDetailsData.splice(index, 1);
-                updateSourceDetailsTable();
-            }, 300);
-        });
-    });
-}
 
 // ===== COMPREHENSIVE DEBUGGING & TESTING FUNCTIONS =====
 
@@ -1706,121 +1204,40 @@ if (closeMlResultsBtn) {
     });
 }
 
-
-// document.addEventListener('DOMContentLoaded', function() {
-    
-//     const wellDefined = document.getElementById('Welldefined');
-//     const involvesML = document.getElementById('involvesML');
-//     const unstructuredData = document.getElementById('unstructuredData');
-//     const storageSolution = document.getElementById('storagesolution');
-//     const storageCheckmark = document.getElementById('check6');
-
-//     if (!wellDefined || !involvesML || !unstructuredData || !storageSolution) {
-//         console.warn('Storage rule dropdowns not found');
-//         return;
-//     }
-
-//     // Set default values
-//     wellDefined.value = 'Yes';
-//     involvesML.value = 'No';
-//     unstructuredData.value = 'No';
-    // ===== LOAD CLOUD PROVIDERS FROM DATABASE =====
-// async function loadCloudProviders() {
-//     try {
-//         console.log('📡 Fetching cloud providers from database...');
-        
-//         const response = await fetch('http://127.0.0.1:5000/api/cloud');
-        
-//         if (!response.ok) {
-//             throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-        
-//         const cloudProviders = await response.json();
-//         const cloudDropdown = document.getElementById('cloudStack');
-        
-//         if (!cloudDropdown) {
-//             console.error('❌ Cloud dropdown not found');
-//             return;
-//         }
-        
-//         // Clear and populate
-//         cloudDropdown.innerHTML = '<option value="">Select Cloud Stack</option>';
-        
-//         cloudProviders.forEach(cloud => {
-//             const option = document.createElement('option');
-//             option.value = cloud;
-//             option.textContent = cloud;
-//             cloudDropdown.appendChild(option);
-//         });
-        
-//         console.log(`✅ Loaded ${cloudProviders.length} cloud providers:`, cloudProviders);
-        
-//     } catch (error) {
-//         console.error('❌ Error loading cloud providers:', error);
-        
-//         const cloudDropdown = document.getElementById('cloudStack');
-//         if (cloudDropdown) {
-//             cloudDropdown.innerHTML = `
-//                 <option value="">Select Cloud Stack</option>
-//                 <option value="AWS">AWS</option>
-//                 <option value="Azure">Azure</option>
-//                 <option value="GCP">GCP</option>
-//             `;
-//             console.warn('⚠️ Using fallback cloud providers');
-//         }
-//     }
-// }
-
-// // ===== LOAD TECHNOLOGIES FROM DATABASE =====
-// async function loadAvailableTechnologies() {
-//     // ... your existing code
-// }
-
-// // ===== INITIALIZE ON PAGE LOAD =====
-// document.addEventListener('DOMContentLoaded', async function() {
-    
-//     // Load data from database
-//     await loadCloudProviders();
-//     await loadAvailableTechnologies();
-    
-//     // Existing storage rules code
-//     const wellDefined = document.getElementById('Welldefined');
-//     const involvesML = document.getElementById('involvesML');
-//     const unstructuredData = document.getElementById('unstructuredData');
-//     const storageSolution = document.getElementById('storagesolution');
-
-//     // ... rest of your existing code
-// });
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log("🚀 Initializing Application...");
     
-    // 🆕 Load cloud providers and technologies from database FIRST
-    await loadCountries()
-    await loadCloudProviders();
-    await loadAvailableTechnologies();
-    await loadSourceCombinations();
-    // Then handle storage rules
+    // 1. Wait for all database values to load
+    await Promise.all([
+        loadCountries(),
+        loadCloudProviders(),
+        loadAvailableTechnologies(),
+        loadSourceTypes(), 
+        loadSourceModes(),
+        loadSourceVarieties()
+    ]);
+
+    // 2. Attach the Conditional Rule Listener
+    const sourceTypeDropdown = document.getElementById('sourceTypeDropdown');
+    if (sourceTypeDropdown) {
+        sourceTypeDropdown.addEventListener('change', applySourceRules);
+        console.log("✅ Source Rules successfully attached");
+    }
+
+    // 3. Setup Storage Decision Logic
     const wellDefined = document.getElementById('Welldefined');
     const involvesML = document.getElementById('involvesML');
     const unstructuredData = document.getElementById('unstructuredData');
     const storageSolution = document.getElementById('storagesolution');
     const storageCheckmark = document.getElementById('check6');
 
-    if (!wellDefined || !involvesML || !unstructuredData || !storageSolution) {
-        console.warn('Storage rule dropdowns not found');
-        return;
-    }
-
-    // Set default values
-    wellDefined.value = 'Yes';
-    involvesML.value = 'No';
-    unstructuredData.value = 'No';
+    // Default Values
+    if(wellDefined) wellDefined.value = 'Yes';
+    if(involvesML) involvesML.value = 'No';
+    if(unstructuredData) unstructuredData.value = 'No';
 
     function updateStorageDecision() {
-        console.log('Storage Decision Inputs:', {
-            wellDefined: wellDefined.value,
-            involvesML: involvesML.value,
-            unstructuredData: unstructuredData.value
-        });
+        if (!wellDefined || !storageSolution) return;
 
         if (
             wellDefined.value === 'Yes' &&
@@ -1828,33 +1245,21 @@ document.addEventListener('DOMContentLoaded', async function() {
             unstructuredData.value === 'No'
         ) {
             storageSolution.value = 'Data Warehouse';
-            console.log('✓ Storage Decision: Data Warehouse');
         } else {
             storageSolution.value = 'Data Lake';
-            console.log('✓ Storage Decision: Data Lake');
         }
         
-        if (storageCheckmark) {
-            storageCheckmark.classList.add('show');
-        }
-        
-        if (wellDefined.value) {
-            document.getElementById('check3')?.classList.add('show');
-        }
-        if (involvesML.value) {
-            document.getElementById('check4')?.classList.add('show');
-        }
-        
+        if (storageCheckmark) storageCheckmark.classList.add('show');
         updateProgress();
     }
 
-    // Initial update
-    updateStorageDecision();
+    // Attach Storage listeners
+    [wellDefined, involvesML, unstructuredData].forEach(el => {
+        if(el) el.addEventListener('change', updateStorageDecision);
+    });
 
-    // Listen to dependency changes
-    wellDefined.addEventListener('change', updateStorageDecision);
-    involvesML.addEventListener('change', updateStorageDecision);
-    unstructuredData.addEventListener('change', updateStorageDecision);
+    // Initial run
+    updateStorageDecision();
 });
     function updateStorageDecision() {
         console.log('Storage Decision Inputs:', {
