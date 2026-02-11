@@ -177,14 +177,34 @@ def get_techstack():
 
     cloud = data.get('cloud_context')
     storage_solution = data.get('storage_solution') 
+    source_details = data.get('source_details_history')
 
-    print(cloud)
-    print("DataStorage is :", storage_solution)
-
-    
+    # print(cloud)
+    # print("DataStorage is :", storage_solution)
 
 
-    
+
+
+    # SETTING FLAG CONDITION FOR STORAGE_SOLUTION
+
+    if(storage_solution == "Data Warehouse"):
+        flag =1
+    else:
+        flag = 0
+
+
+    values_rows = []
+
+    for item in source_details:
+        source_type = item['source_types'][0]
+        mode = item['modes'][0]
+
+        values_rows.append(f"('{source_type}', '{mode}')")
+
+    values_clause = ",\n".join(values_rows)
+
+
+
     if not cloud:
         return jsonify({"error": "Cloud input is required"}), 400
 
@@ -192,14 +212,18 @@ def get_techstack():
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 # This fetches the full rows for the table display
-                query = """
+                query = f"""
                     WITH SRC_DET AS 
                     (
                         SELECT DISTINCT
                              source_type
                            , mode
                          , DENSE_RANK() OVER (ORDER BY source_type, mode) feed_no
-                        FROM source_details
+                        FROM
+                        (
+                            VALUES
+                            {values_clause}
+                        ) AS source_details(source_type, mode)
                     ),
                     SRC_DET_TECH_STACK AS (
                         SELECT b.cloud, a.source_type, a.mode, a.feed_no, b.ingestion_tool, b.orchestration_tool, b.transformation_tool, b.data_warehouse, b.data_lakehouse
@@ -214,7 +238,7 @@ def get_techstack():
                     , CONCAT(a.ingestion_tool, ',', b.ingestion_tool, ',', c.ingestion_tool, ',', d.ingestion_tool, ',', e.ingestion_tool, ',', f.ingestion_tool, ',', g.ingestion_tool, ',', h.ingestion_tool, ',', i.ingestion_tool, ',', j.ingestion_tool) ingestion_tool
                     , a.orchestration_tool
                     , a.transformation_tool
-                    , CASE WHEN 1=1 THEN a.data_warehouse ELSE a.data_lakehouse END data_storage
+                    , CASE WHEN ? = 1 THEN a.data_warehouse ELSE a.data_lakehouse END data_storage
                     FROM SRC_DET_TECH_STACK a
                     LEFT OUTER JOIN SRC_DET_TECH_STACK b ON (b.cloud = a.cloud  and b.feed_no = 2  and b.orchestration_tool = a.orchestration_tool and b.transformation_tool = a.transformation_tool and b.data_warehouse = a.data_warehouse and b.data_lakehouse = a.data_lakehouse)
                     LEFT OUTER JOIN SRC_DET_TECH_STACK c ON (c.cloud = a.cloud  and c.feed_no = 3  and c.orchestration_tool = a.orchestration_tool and c.transformation_tool = a.transformation_tool and c.data_warehouse = a.data_warehouse and c.data_lakehouse = a.data_lakehouse)
@@ -229,9 +253,11 @@ def get_techstack():
                     AND a.cloud = ?
                     ORDER BY 1,2,3,4,5,6,7
                 """
-                cursor.execute(query, (cloud,))
+                print(query)
+                cursor.execute(query, (flag,cloud))
                 columns = [col[0] for col in cursor.description]
                 result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                # print(result)
                 return jsonify(result)
     except Exception as e:
         print(f"❌ Database Error in /api/techstack: {e}")
