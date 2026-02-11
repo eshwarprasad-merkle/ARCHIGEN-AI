@@ -1,19 +1,28 @@
 import pyodbc
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import google.generativeai as genai
+
 
 app = Flask(__name__)
 CORS(app)
+
+
 
 # ✅ SQL Server Connection Configuration
 # Note: In a production environment, consider using environment variables for these strings
 DB_CONFIG = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=IN-1YQNYP3;"
-    "DATABASE=archigenai2;"
+    "SERVER=IN-2TJSYP3;"
+    "DATABASE=ArchiGenAI_new;"
     "Trusted_Connection=yes;"
     "TrustServerCertificate=yes;"
 )
+
+# Gemini API Config
+
+
+
 
 def get_db_connection():
     return pyodbc.connect(DB_CONFIG)
@@ -61,6 +70,9 @@ def fetch_config_values(key):
         return None
 
 #==================================================== Configuration Loading ================================================#
+GEMINI_API_KEY = fetch_config_values("GEMINI_API_KEY")  # or store separate GEMINI key
+genai.configure(api_key=GEMINI_API_KEY)
+gemini_model = genai.GenerativeModel("gemini-1.5-pro")
 
 # Dictionary to hold the global config state
 app_settings = {}
@@ -339,8 +351,81 @@ def get_techstack():
     except Exception as e:
         print(f"❌ Database Error in /api/techstack: {e}")
         return jsonify({"error": str(e)}), 500
+    
+
+def build_payload(data):
+    return f"""
+Cloud Platform: {data.get('cloud')}
+Source Type: {data.get('source_type')}
+Data Processing Mode: {data.get('mode')}
+Data Ingestion Method: {data.get('data_ingestion')}
+Workflow Orchestration: {data.get('workflow_orchestration')}
+Data Transformation Tool: {data.get('data_transformation')}
+Data Lake/Warehouse: {data.get('datalake_warehouse')}
+Involves Machine Learning: {data.get('involves_ml')}
+Well-Defined Use Case: {data.get('well_defined')}
+Architecture Confidence Score: {float(data.get('score',0)):.2f}
+Recommended Rank: #{data.get('rank')}
+"""
+
+
+def build_prompt(payload_text):
+    return f"""
+You are a Senior Data Architect.
+
+Configuration:
+{payload_text}
+
+Please provide a comprehensive, step-by-step architecture explanation for this specific configuration. Include:
+
+1. Data ingestion layer details
+2. Storage architecture
+3. Processing and transformation workflows
+4. Analytics and consumption layer
+5. Security and governance considerations
+6. Monitoring and observability setup
+
+Explain with enterprise-level detail and real-world examples.
+"""
+
+@app.route("/api/expand_architecture", methods=["POST"])
+def expand_architecture():
+    try:
+        data = request.get_json()
+
+        # Build structured payload
+        payload_text = build_payload(data)
+
+        # Build Gemini prompt
+        prompt = build_prompt(payload_text)
+
+        # Call Gemini
+        response = gemini_model.generate_content(prompt)
+
+        if not response.text:
+         return jsonify({"error": "Gemini returned empty response"}), 500
+
+        return jsonify({
+            "payload_sent": payload_text,
+            "architecture_explanation": response.text
+        })
+
+    except Exception as e:
+        print("❌ Gemini Error:", e)
+        return jsonify({"error": str(e)}), 500
+    
+def init_gemini():
+    global gemini_model
+    api_key = fetch_config_values("GEMINI_API_KEY")
+    if not api_key:
+        raise Exception("❌ GEMINI_API_KEY not found in DB")
+    genai.configure(api_key=api_key)
+    gemini_model = genai.GenerativeModel("gemini-1.5-pro")
+
+
 
 if __name__ == "__main__":
     # Pre-load settings from DB
     load_environment_variables()
+    # init_gemini()
     app.run(debug=True, port=5000)
