@@ -196,16 +196,60 @@ def get_techstack():
         flag = 0
 
 
-    # values_rows = []
+    # TECH_STACK_SELECTION 
 
-    # for item in source_details:
-    #     source_type = item['source_types'][0]
-    #     mode = item['modes'][0]
+    if storage_solution == "Data Warehouse":
+        storage_coloumn = "a.data_warehouse"
+    else:
+        storage_coloumn = "a.data_lakehouse"
 
-    #     values_rows.append(f"('{source_type}', '{mode}')")
+    # Build the CONCAT expression once
+    concat_expression = f"""
+    CONCAT(
+        a.ingestion_tool, ',', 
+        b.ingestion_tool, ',', 
+        c.ingestion_tool, ',', 
+        d.ingestion_tool, ',', 
+        e.ingestion_tool, ',', 
+        f.ingestion_tool, ',', 
+        g.ingestion_tool, ',', 
+        h.ingestion_tool, ',', 
+        i.ingestion_tool, ',', 
+        j.ingestion_tool, ',', 
+        a.orchestration_tool, ',', 
+        a.transformation_tool, ',', 
+        {storage_coloumn}
+    )
+    """
+    print(concat_expression)
+    # ===============================
+    # 2️⃣ Build dynamic tech filter
+    # ===============================
 
-    # values_clause = ",\n".join(values_rows)
+    # tech_filter_sql = ""
 
+    # if tech_stack and len(tech_stack) > 0:
+    #     charindex_conditions = [
+    #         f"CHARINDEX(?, {concat_expression}) > 0"
+    #         for _ in tech_stack
+    #     ]
+    #     tech_filter_clause = " OR ".join(charindex_conditions)
+    #     tech_filter_sql = f"AND ({tech_filter_clause})"
+
+
+    # Generate dynamic CHARINDEX conditions
+    charindex_conditions = []
+    for _ in tech_stack:
+        charindex_conditions.append(f"CHARINDEX(?, {concat_expression}) > 0")
+
+    # Join using OR
+    tech_filter_clause = " OR ".join(
+        [f"CHARINDEX(?, {concat_expression}) > 0" for _ in tech_stack]
+    )
+
+
+
+    # INLINE VIEWS FOR SOURCE_DETAILS   
     values_rows = []
 
     for item in source_details:
@@ -264,11 +308,29 @@ def get_techstack():
                     LEFT OUTER JOIN SRC_DET_TECH_STACK j ON (j.cloud = a.cloud  and j.feed_no = 10 and j.orchestration_tool = a.orchestration_tool and j.transformation_tool = a.transformation_tool and j.data_warehouse = a.data_warehouse and j.data_lakehouse = a.data_lakehouse)
                     WHERE a.feed_no = 1
                     AND a.cloud = ?
+                    AND ({tech_filter_clause}) 
                     ORDER BY 1,2,3,4,5,6,7
                 """
                 # print(query)
 
-                cursor.execute(query, (flag,cloud))
+                # ===============================
+                # 4️⃣ Build parameter list
+                # ===============================
+
+                # params = [flag, cloud]
+
+                # if tech_stack:
+                #     params.extend(tech_stack)
+
+
+
+                # print("Total ? in query:", query.count("?"))
+                # print("Total params:", len(params))
+
+                # cursor.execute(query, params)
+
+
+                cursor.execute(query, (flag,cloud,*tech_stack))
 
                 columns = [col[0] for col in cursor.description]
                 result = [dict(zip(columns, row)) for row in cursor.fetchall()]
