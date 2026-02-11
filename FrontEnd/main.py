@@ -98,21 +98,6 @@ def get_config():
     
     return jsonify(value)
 
-# @app.route("/api/techstack", methods=["GET"])
-# def get_techstack():
-#     cloud = request.args.get("cloud")
-#     if not cloud:
-#         return jsonify({"error": "Cloud input is required"}), 400
-
-#     try:
-#         with get_db_connection() as conn:
-#             with conn.cursor() as cursor:
-#                 cursor.execute("SELECT * FROM tech_stack WHERE cloud = ?", (cloud,))
-#                 columns = [col[0] for col in cursor.description]
-#                 result = [dict(zip(columns, row)) for row in cursor.fetchall()]
-#                 return jsonify(result)
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
 
 # # Additional specific routes for UI dropdowns
 # @app.route("/api/technologies", methods=["GET"])
@@ -136,6 +121,84 @@ def get_config():
 #         return jsonify({"error": str(e)}), 500
 
 #==================================================== Execution ====================================================#
+
+    
+@app.route("/api/technologies/filter", methods=["GET"])
+def get_filtered_technologies():
+    cloud = request.args.get("cloud")
+    
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Logic: Fetch tools matching the selected cloud OR where cloud is NULL
+                # This covers agnostic tools like Python, Docker, Spark, etc.
+                query = """
+                    SELECT * 
+                    FROM tech_stack 
+                    WHERE cloud = ? 
+                """
+                cursor.execute(query, (cloud,))
+                tech_list = [row[0] for row in cursor.fetchall()]
+                return jsonify(tech_list)
+    except Exception as e:
+        print(f"❌ Database Error: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route("/api/techstack", methods=["GET"])
+def get_techstack():
+    cloud = request.args.get("cloud")
+    if not cloud:
+        return jsonify({"error": "Cloud input is required"}), 400
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # This fetches the full rows for the table display
+                query = """
+                    WITH SRC_DET AS 
+                    (
+                        SELECT DISTINCT
+                             source_type
+                           , mode
+                         , DENSE_RANK() OVER (ORDER BY source_type, mode) feed_no
+                        FROM source_details
+                    ),
+                    SRC_DET_TECH_STACK AS (
+                        SELECT b.cloud, a.source_type, a.mode, a.feed_no, b.ingestion_tool, b.orchestration_tool, b.transformation_tool, b.data_warehouse, b.data_lakehouse
+                      FROM SRC_DET a
+                         , end_to_end_pipeline_stacks b
+                     WHERE a.source_type = ISNULL(b.source_type, a.source_type)
+                       AND a.mode = ISNULL(b.mode, a.mode)
+                    )
+                    SELECT DISTINCT a.cloud
+                    , CONCAT(a.source_type, ',', b.source_type, ',', c.source_type, ',', d.source_type, ',', e.source_type, ',', f.source_type, ',', g.source_type, ',', h.source_type, ',', i.source_type, ',', j.source_type) source_type
+                    , CONCAT(a.mode, ',', b.mode, ',', c.mode, ',', d.mode, ',', e.mode, ',', f.mode, ',', g.mode, ',', h.mode, ',', i.mode, ',', j.mode) mode
+                    , CONCAT(a.ingestion_tool, ',', b.ingestion_tool, ',', c.ingestion_tool, ',', d.ingestion_tool, ',', e.ingestion_tool, ',', f.ingestion_tool, ',', g.ingestion_tool, ',', h.ingestion_tool, ',', i.ingestion_tool, ',', j.ingestion_tool) ingestion_tool
+                    , a.orchestration_tool
+                    , a.transformation_tool
+                    , CASE WHEN 1=1 THEN a.data_warehouse ELSE a.data_lakehouse END data_storage
+                    FROM SRC_DET_TECH_STACK a
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK b ON (b.cloud = a.cloud  and b.feed_no = 2  and b.orchestration_tool = a.orchestration_tool and b.transformation_tool = a.transformation_tool and b.data_warehouse = a.data_warehouse and b.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK c ON (c.cloud = a.cloud  and c.feed_no = 3  and c.orchestration_tool = a.orchestration_tool and c.transformation_tool = a.transformation_tool and c.data_warehouse = a.data_warehouse and c.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK d ON (d.cloud = a.cloud  and d.feed_no = 4  and d.orchestration_tool = a.orchestration_tool and d.transformation_tool = a.transformation_tool and d.data_warehouse = a.data_warehouse and d.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK e ON (e.cloud = a.cloud  and e.feed_no = 5  and e.orchestration_tool = a.orchestration_tool and e.transformation_tool = a.transformation_tool and e.data_warehouse = a.data_warehouse and e.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK f ON (f.cloud = a.cloud  and f.feed_no = 6  and f.orchestration_tool = a.orchestration_tool and f.transformation_tool = a.transformation_tool and f.data_warehouse = a.data_warehouse and f.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK g ON (g.cloud = a.cloud  and g.feed_no = 7  and g.orchestration_tool = a.orchestration_tool and g.transformation_tool = a.transformation_tool and g.data_warehouse = a.data_warehouse and g.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK h ON (h.cloud = a.cloud  and h.feed_no = 8  and h.orchestration_tool = a.orchestration_tool and h.transformation_tool = a.transformation_tool and h.data_warehouse = a.data_warehouse and h.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK i ON (i.cloud = a.cloud  and i.feed_no = 9  and i.orchestration_tool = a.orchestration_tool and i.transformation_tool = a.transformation_tool and i.data_warehouse = a.data_warehouse and i.data_lakehouse = a.data_lakehouse)
+                    LEFT OUTER JOIN SRC_DET_TECH_STACK j ON (j.cloud = a.cloud  and j.feed_no = 10 and j.orchestration_tool = a.orchestration_tool and j.transformation_tool = a.transformation_tool and j.data_warehouse = a.data_warehouse and j.data_lakehouse = a.data_lakehouse)
+                    WHERE a.feed_no = 1
+                    AND a.cloud = ?
+                    ORDER BY 1,2,3,4,5,6,7
+                """
+                cursor.execute(query, (cloud,))
+                columns = [col[0] for col in cursor.description]
+                result = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                return jsonify(result)
+    except Exception as e:
+        print(f"❌ Database Error in /api/techstack: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     # Pre-load settings from DB
