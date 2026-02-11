@@ -1081,6 +1081,7 @@ function applySourceRules() {
             } 
             else {
                 storageSolution.value = 'Data Lake';
+                 storageSolution.disabled = true;
             }
             
             if (storageCheckmark) storageCheckmark.classList.add('show');
