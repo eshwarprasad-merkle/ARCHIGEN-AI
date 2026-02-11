@@ -9,8 +9,8 @@ CORS(app)
 # Note: In a production environment, consider using environment variables for these strings
 DB_CONFIG = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=IN-2TJSYP3;"
-    "DATABASE=ArchiGenAI_new;"
+    "SERVER=IN-1YQNYP3;"
+    "DATABASE=archigenai2;"
     "Trusted_Connection=yes;"
     "TrustServerCertificate=yes;"
 )
@@ -19,6 +19,30 @@ def get_db_connection():
     return pyodbc.connect(DB_CONFIG)
 
 #==================================================== Helper Function ====================================================#
+
+# def fetch_config_values(key):
+#     """Fetches a value from the app_config table by its key."""
+#     try:
+#         with get_db_connection() as conn:
+#             print("✅ Connection established successfully")
+
+#             # 🔎 Test the connection
+#             with conn.cursor() as cursor:
+#                 cursor.execute("SELECT 1")
+#                 print("✅ Connection test query executed")
+
+#                 query = "SELECT [value] FROM app_config WHERE [key] = ?"
+#                 cursor.execute(query, (key,))
+#                 row = cursor.fetchone()
+
+#                 if row and row[0] is not None:
+#                     return str(row[0])
+#                 return None
+
+#     except Exception as e:
+#         print(f"❌ Error fetching config key '{key}': {e}")
+#         return None
+
 
 def fetch_config_values(key):
     """Fetches a value from the app_config table by its key."""
@@ -145,9 +169,22 @@ def get_filtered_technologies():
         return jsonify({"error": str(e)}), 500
     
 
-@app.route("/api/techstack", methods=["GET"])
+@app.route("/api/techstack", methods=["GET","POST"])
 def get_techstack():
-    cloud = request.args.get("cloud")
+
+
+    data = request.get_json()
+
+    cloud = data.get('cloud_context')
+    storage_solution = data.get('storage_solution') 
+
+    print(cloud)
+    print("DataStorage is :", storage_solution)
+
+    
+
+
+    
     if not cloud:
         return jsonify({"error": "Cloud input is required"}), 400
 

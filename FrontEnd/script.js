@@ -1149,6 +1149,8 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
                 console.warn('No cloud selected');
                 return;
             }
+            
+
 
             // 1. Construct the Final JSON object for the console
             const finalSubmissionJSON = {
@@ -1171,8 +1173,17 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
                 finalGoButton.disabled = true;
                 finalGoButton.style.opacity = '0.7';
                 
-                const response = await fetch(`http://127.0.0.1:5000/api/techstack?cloud=${encodeURIComponent(cloudValue)}`);
+                // const response = await fetch(`http://127.0.0.1:5000/api/techstack?cloud=${encodeURIComponent(cloudValue)}`);
                 
+                const response = await fetch("http://127.0.0.1:5000/api/techstack", 
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(finalSubmissionJSON)
+                    });
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
