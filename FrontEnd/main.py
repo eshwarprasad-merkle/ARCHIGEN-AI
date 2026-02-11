@@ -157,9 +157,10 @@ def get_filtered_technologies():
                 # Logic: Fetch tools matching the selected cloud OR where cloud is NULL
                 # This covers agnostic tools like Python, Docker, Spark, etc.
                 query = """
-                    SELECT * 
-                    FROM tech_stack 
-                    WHERE cloud = ? 
+                    SELECT DISTINCT tool
+                    FROM tech_stack
+                    WHERE cloud = ? OR cloud IS NULL
+                    ORDER BY tool
                 """
                 cursor.execute(query, (cloud,))
                 tech_list = [row[0] for row in cursor.fetchall()]
@@ -183,7 +184,7 @@ def get_techstack():
 
     # print(cloud)
     # print("DataStorage is :", storage_solution)
-    print(tech_stack)
+    print("TECH STACK :" ,tech_stack)
 
 
 
