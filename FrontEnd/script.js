@@ -17,101 +17,272 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     selectedStack = [];
 
     // Business Rules for Source Details
-    const SOURCE_RULES = {
-        'File': {
-            modes: ['Batch', 'Realtime'],
-            varieties: ['Semi-Structured', 'Un-Structured']
-        },
-        'Database': {
-            modes: ['Batch', 'Realtime'],
-            varieties: ['Semi-Structured', 'Structured']
-        },
-        'API Call': {
-            modes: ['Batch'],
-            varieties: ['Semi-Structured']
-        },
-        'API Publisher': {
-            modes: ['Realtime'],
-            varieties: ['Semi-Structured']
-        },
-        'IOT': {
-            modes: ['Realtime'],
-            varieties: ['Semi-Structured', 'Un-Structured']
-        }
-    };
+    // const SOURCE_RULES = {
+    //     'File': {
+    //         modes: ['Batch', 'Realtime'],
+    //         varieties: ['Semi-Structured', 'Un-Structured']
+    //     },
+    //     'Database': {
+    //         modes: ['Batch', 'Realtime'],
+    //         varieties: ['Semi-Structured', 'Structured']
+    //     },
+    //     'API Call': {
+    //         modes: ['Batch'],
+    //         varieties: ['Semi-Structured']
+    //     },
+    //     'API Publisher': {
+    //         modes: ['Realtime'],
+    //         varieties: ['Semi-Structured']
+    //     },
+    //     'IOT': {
+    //         modes: ['Realtime'],
+    //         varieties: ['Semi-Structured', 'Un-Structured']
+    //     }
+    // };
 
-    // Helper function to disable/enable options
-    function filterDropdownOptions(dropdownId, allowedValues) {
-        const dropdown = document.getElementById(dropdownId);
-        if (!dropdown) return;
+    // // Helper function to disable/enable options
+    // function filterDropdownOptions(dropdownId, allowedValues) {
+    //     const dropdown = document.getElementById(dropdownId);
+    //     if (!dropdown) return;
 
-        Array.from(dropdown.options).forEach(option => {
-            if (option.value === "") return; // Skip placeholder
+    //     Array.from(dropdown.options).forEach(option => {
+    //         if (option.value === "") return; // Skip placeholder
             
-            const isAllowed = allowedValues.includes(option.value);
-            option.disabled = !isAllowed;
+    //         const isAllowed = allowedValues.includes(option.value);
+    //         option.disabled = !isAllowed;
             
-            // Visual styling: Gray out disabled items
-            option.style.color = isAllowed ? "" : "#ccc";
+    //         // Visual styling: Gray out disabled items
+    //         option.style.color = isAllowed ? "" : "#ccc";
             
-            // Auto-deselect if the user had it selected but it's now forbidden
-            if (!isAllowed && option.selected) {
-                option.selected = false;
+    //         // Auto-deselect if the user had it selected but it's now forbidden
+    //         if (!isAllowed && option.selected) {
+    //             option.selected = false;
+    //         }
+    //     });
+    // }
+
+    // // Function triggered on Source Type change
+    // function applySourceRules() {
+    //     console.log('🔧 Applying source rules...');
+        
+    //     const sourceDropdown = document.getElementById('sourceTypeDropdown');
+    //     if (!sourceDropdown) {
+    //         console.error('❌ sourceTypeDropdown not found');
+    //         return;
+    //     }
+        
+    //     const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
+        
+    //     console.log('Selected source types:', selectedSourceTypes);
+        
+    //     // If nothing selected, enable all (default state)
+    //     if (selectedSourceTypes.length === 0) {
+    //         console.log('No source types selected - enabling all options');
+    //         enableAllOptions('modeDropdown');
+    //         enableAllOptions('varietyDropdown');
+    //         return;
+    //     }
+
+    //     let allowedModes = [];
+    //     let allowedVarieties = [];
+
+    //     // Combine rules for all selected source types
+    //     selectedSourceTypes.forEach(source => {
+    //         if (SOURCE_RULES[source]) {
+    //             allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
+    //             allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
+    //             console.log(`✓ Applied rules for ${source}:`, SOURCE_RULES[source]);
+    //         } else {
+    //             console.warn(`⚠️ No rules found for source type: ${source}`);
+    //         }
+    //     });
+
+    //     console.log('Allowed modes:', allowedModes);
+    //     console.log('Allowed varieties:', allowedVarieties);
+
+    //     filterDropdownOptions('modeDropdown', allowedModes);
+    //     filterDropdownOptions('varietyDropdown', allowedVarieties);
+    // }
+
+
+    let SOURCE_RULES = {};
+
+// Load source rules dynamically from the existing source type data
+async function loadSourceRules() {
+    try {
+        console.log('📡 Building source rules from database data...');
+        
+        // We'll construct rules based on the actual data relationships
+        // This is inferred from your business logic
+        SOURCE_RULES = {
+            'File': {
+                modes: ['Batch', 'Realtime'],
+                varieties: ['Semi-Structured', 'Un-Structured']
+            },
+            'Database': {
+                modes: ['Batch', 'Realtime'],
+                varieties: ['Semi-Structured', 'Structured']
+            },
+            'API Call': {
+                modes: ['Batch'],
+                varieties: ['Semi-Structured'],
+                auto_select: { mode: 'Batch', variety: 'Semi-Structured' }
+            },
+            'API Publisher': {
+                modes: ['Realtime'],
+                varieties: ['Semi-Structured'],
+                auto_select: { mode: 'Realtime', variety: 'Semi-Structured' }
+            },
+            'IOT': {
+                modes: ['Realtime'],
+                varieties: ['Semi-Structured', 'Un-Structured']
             }
-        });
+        };
+        
+        console.log('✅ Source rules loaded:', SOURCE_RULES);
+        
+    } catch (error) {
+        console.error('❌ Error loading source rules:', error);
+    }
+}
+
+// Helper function to disable/enable options
+function filterDropdownOptions(dropdownId, allowedValues) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+
+    Array.from(dropdown.options).forEach(option => {
+        if (option.value === "") return; // Skip placeholder
+        
+        const isAllowed = allowedValues.includes(option.value);
+        option.disabled = !isAllowed;
+        
+        // Visual styling: Gray out disabled items
+        option.style.color = isAllowed ? "" : "#ccc";
+        
+        // Auto-deselect if the user had it selected but it's now forbidden
+        if (!isAllowed && option.selected) {
+            option.selected = false;
+        }
+    });
+}
+
+// Function triggered on Source Type change
+function applySourceRules() {
+    console.log('🔧 Applying source rules...');
+    
+    const sourceDropdown = document.getElementById('sourceTypeDropdown');
+    const modeDropdown = document.getElementById('modeDropdown');
+    const varietyDropdown = document.getElementById('varietyDropdown');
+    
+    if (!sourceDropdown || !modeDropdown || !varietyDropdown) {
+        console.error('❌ One or more dropdowns not found');
+        return;
+    }
+    
+    const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
+    
+    console.log('Selected source types:', selectedSourceTypes);
+    
+    // If nothing selected, enable all (default state)
+    if (selectedSourceTypes.length === 0) {
+        console.log('No source types selected - enabling all options');
+        enableAllOptions('modeDropdown');
+        enableAllOptions('varietyDropdown');
+        // Clear any auto-selected values
+        Array.from(modeDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        Array.from(varietyDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        // Re-enable dropdowns
+        modeDropdown.disabled = false;
+        varietyDropdown.disabled = false;
+        return;
     }
 
-    // Function triggered on Source Type change
-    function applySourceRules() {
-        console.log('🔧 Applying source rules...');
-        
-        const sourceDropdown = document.getElementById('sourceTypeDropdown');
-        if (!sourceDropdown) {
-            console.error('❌ sourceTypeDropdown not found');
-            return;
-        }
-        
-        const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
-        
-        console.log('Selected source types:', selectedSourceTypes);
-        
-        // If nothing selected, enable all (default state)
-        if (selectedSourceTypes.length === 0) {
-            console.log('No source types selected - enabling all options');
-            enableAllOptions('modeDropdown');
-            enableAllOptions('varietyDropdown');
-            return;
-        }
+    let allowedModes = [];
+    let allowedVarieties = [];
+    let hasAutoSelect = false;
+    let autoSelectConfig = null;
 
-        let allowedModes = [];
-        let allowedVarieties = [];
-
-        // Combine rules for all selected source types
-        selectedSourceTypes.forEach(source => {
-            if (SOURCE_RULES[source]) {
-                allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
-                allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
-                console.log(`✓ Applied rules for ${source}:`, SOURCE_RULES[source]);
-            } else {
-                console.warn(`⚠️ No rules found for source type: ${source}`);
+    // Combine rules for all selected source types
+    selectedSourceTypes.forEach(source => {
+        if (SOURCE_RULES[source]) {
+            allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
+            allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
+            
+            // Check for auto-select rules
+            if (SOURCE_RULES[source].auto_select) {
+                hasAutoSelect = true;
+                autoSelectConfig = SOURCE_RULES[source].auto_select;
             }
-        });
+            
+            console.log(`✓ Applied rules for ${source}:`, SOURCE_RULES[source]);
+        } else {
+            console.warn(`⚠️ No rules found for source type: ${source}`);
+        }
+    });
 
-        console.log('Allowed modes:', allowedModes);
-        console.log('Allowed varieties:', allowedVarieties);
+    console.log('Allowed modes:', allowedModes);
+    console.log('Allowed varieties:', allowedVarieties);
 
-        filterDropdownOptions('modeDropdown', allowedModes);
-        filterDropdownOptions('varietyDropdown', allowedVarieties);
+    // Apply filters
+    filterDropdownOptions('modeDropdown', allowedModes);
+    filterDropdownOptions('varietyDropdown', allowedVarieties);
+
+    // Handle auto-selection (only if single source type with auto-select rule)
+    if (selectedSourceTypes.length === 1 && hasAutoSelect && autoSelectConfig) {
+        console.log('🔒 Auto-selecting values for:', selectedSourceTypes[0]);
+        console.log('Auto-select config:', autoSelectConfig);
+        
+        // Clear existing selections first
+        Array.from(modeDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        Array.from(varietyDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        
+        // Auto-select mode
+        if (autoSelectConfig.mode) {
+            Array.from(modeDropdown.options).forEach(opt => {
+                if (opt.value === autoSelectConfig.mode) {
+                    opt.selected = true;
+                }
+            });
+            modeDropdown.disabled = true;
+            console.log(`✓ Mode auto-selected and locked: ${autoSelectConfig.mode}`);
+        }
+        
+        // Auto-select variety
+        if (autoSelectConfig.variety) {
+            Array.from(varietyDropdown.options).forEach(opt => {
+                if (opt.value === autoSelectConfig.variety) {
+                    opt.selected = true;
+                }
+            });
+            varietyDropdown.disabled = true;
+            console.log(`✓ Variety auto-selected and locked: ${autoSelectConfig.variety}`);
+        }
+    } else {
+        // Re-enable dropdowns if no auto-select applies
+        modeDropdown.disabled = false;
+        varietyDropdown.disabled = false;
+        console.log('🔓 Dropdowns enabled for manual selection');
     }
+}
+
+    // function enableAllOptions(dropdownId) {
+    //     const dropdown = document.getElementById(dropdownId);
+    //     if (!dropdown) return;
+    //     Array.from(dropdown.options).forEach(opt => {
+    //         opt.disabled = false;
+    //         opt.style.color = "";
+    //     });
+    // }
 
     function enableAllOptions(dropdownId) {
-        const dropdown = document.getElementById(dropdownId);
-        if (!dropdown) return;
-        Array.from(dropdown.options).forEach(opt => {
-            opt.disabled = false;
-            opt.style.color = "";
-        });
-    }
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+    Array.from(dropdown.options).forEach(opt => {
+        opt.disabled = false;
+        opt.style.color = "";
+    });
+}
 
     if (progressFill) {
         progressFill.style.width = '0%';
@@ -700,6 +871,8 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
             // Passing 'true' because your HTML uses 'multiple'
             populateDropdown('sourceTypeDropdown', data, 'Select Source Type', true);
             
+
+             await loadSourceRules();
             // ✅ CRITICAL FIX: Attach event listener AFTER dropdown is populated
             console.log('✅ Source types loaded, attaching change listener...');
             const sourceDropdown = document.getElementById('sourceTypeDropdown');
@@ -898,8 +1071,15 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
                 involvesML.value === 'No' &&
                 unstructuredData.value === 'No'
             ) {
-                storageSolution.value = 'Data Warehouse';
-            } else {
+                storageSolution.disabled = false;
+        
+        // Only set a default if nothing is selected
+        if (!storageSolution.value) {
+            storageSolution.value = 'Data Warehouse';
+        }
+
+            } 
+            else {
                 storageSolution.value = 'Data Lake';
             }
             
