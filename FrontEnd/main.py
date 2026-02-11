@@ -169,10 +169,6 @@ def get_filtered_technologies():
                 # Logic: Fetch tools matching the selected cloud OR where cloud is NULL
                 # This covers agnostic tools like Python, Docker, Spark, etc.
                 query = """
-                   SELECT DISTINCT tool 
-                    FROM tech_stack 
-                    WHERE cloud = ? OR cloud IS NULL
-                    ORDER BY tool
                     SELECT DISTINCT tool
                     FROM tech_stack
                     WHERE cloud = ? OR cloud IS NULL
@@ -369,5 +365,5 @@ def init_gemini():
 if __name__ == "__main__":
     # Pre-load settings from DB
     load_environment_variables()
-    init_gemini()
+    # init_gemini()
     app.run(debug=True, port=5000)
