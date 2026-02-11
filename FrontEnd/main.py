@@ -173,6 +173,10 @@ def get_filtered_technologies():
                     FROM tech_stack 
                     WHERE cloud = ? OR cloud IS NULL
                     ORDER BY tool
+                    SELECT DISTINCT tool
+                    FROM tech_stack
+                    WHERE cloud = ? OR cloud IS NULL
+                    ORDER BY tool
                 """
                 cursor.execute(query, (cloud,))
                 tech_list = [row[0] for row in cursor.fetchall()]
@@ -191,10 +195,12 @@ def get_techstack():
     cloud = data.get('cloud_context')
     storage_solution = data.get('storage_solution') 
     source_details = data.get('source_details_history')
+    tech_stack = data.get('selected_technologies')
+
 
     # print(cloud)
     # print("DataStorage is :", storage_solution)
-
+    print("TECH STACK :" ,tech_stack)
 
 
 
@@ -206,15 +212,25 @@ def get_techstack():
         flag = 0
 
 
+    # values_rows = []
+
+    # for item in source_details:
+    #     source_type = item['source_types'][0]
+    #     mode = item['modes'][0]
+
+    #     values_rows.append(f"('{source_type}', '{mode}')")
+
+    # values_clause = ",\n".join(values_rows)
+
     values_rows = []
 
     for item in source_details:
-        source_type = item['source_types'][0]
-        mode = item['modes'][0]
+        source_type = item['source_types'][0].replace("'", "''")
+        mode = item['modes'][0].replace("'", "''")
 
         values_rows.append(f"('{source_type}', '{mode}')")
 
-    values_clause = ",\n".join(values_rows)
+    inline_view = ",\n".join(values_rows)
 
 
 
@@ -235,7 +251,7 @@ def get_techstack():
                         FROM
                         (
                             VALUES
-                            {values_clause}
+                            {inline_view}
                         ) AS source_details(source_type, mode)
                     ),
                     SRC_DET_TECH_STACK AS (
@@ -266,8 +282,10 @@ def get_techstack():
                     AND a.cloud = ?
                     ORDER BY 1,2,3,4,5,6,7
                 """
-                print(query)
+                # print(query)
+
                 cursor.execute(query, (flag,cloud))
+
                 columns = [col[0] for col in cursor.description]
                 result = [dict(zip(columns, row)) for row in cursor.fetchall()]
                 # print(result)

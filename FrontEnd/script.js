@@ -19,11 +19,11 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     // Business Rules for Source Details
     const SOURCE_RULES = {
         'File': {
-            modes: ['Batch', 'Real-Time', 'Near Real-Time'],
+            modes: ['Batch', 'Realtime'],
             varieties: ['Semi-Structured', 'Un-Structured']
         },
         'Database': {
-            modes: ['Batch', 'Real-Time', 'Near Real-Time'],
+            modes: ['Batch', 'Realtime'],
             varieties: ['Semi-Structured', 'Structured']
         },
         'API Call': {
@@ -31,11 +31,11 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
             varieties: ['Semi-Structured']
         },
         'API Publisher': {
-            modes: ['Real-Time'],
+            modes: ['Realtime'],
             varieties: ['Semi-Structured']
         },
         'IOT': {
-            modes: ['Real-Time'],
+            modes: ['Realtime'],
             varieties: ['Semi-Structured', 'Un-Structured']
         }
     };
@@ -1478,7 +1478,7 @@ function handleRowExpand(rowData, rowIndex) {
                     }, 300);
                 }
 
-                
+
                 finalGoButton.textContent = '✓ Results Loaded';
                 finalGoButton.style.background = 'linear-gradient(135deg, #00c896 0%, #00a86b 100%)';
                 
