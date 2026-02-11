@@ -1,4 +1,4 @@
-const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstructuredData', 'storagesolution'];
+const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstructuredData'];
     const checkmarks = ['check1', 'check2', 'check3', 'check4', 'check5', 'check6'];
     const progressFill = document.getElementById('progressFill');
     const matrixContainer = document.getElementById('matrixContainer');
@@ -72,9 +72,8 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
         }
         
         const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
-        
         console.log('Selected source types:', selectedSourceTypes);
-        
+
         // If nothing selected, enable all (default state)
         if (selectedSourceTypes.length === 0) {
             console.log('No source types selected - enabling all options');
@@ -102,6 +101,30 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
 
         filterDropdownOptions('modeDropdown', allowedModes);
         filterDropdownOptions('varietyDropdown', allowedVarieties);
+
+        // Auto-select Mode and Variety if API Call or API Publisher is selected
+        const autoSelectTypes = ['API Call', 'API Publisher'];
+        autoSelectTypes.forEach(type => {
+            if (selectedSourceTypes.includes(type)) {
+                const modeDropdown = document.getElementById('modeDropdown');
+                const varietyDropdown = document.getElementById('varietyDropdown');
+                const allowedModes = SOURCE_RULES[type]?.modes || [];
+                const allowedVarieties = SOURCE_RULES[type]?.varieties || [];
+                if (modeDropdown && allowedModes.length > 0) {
+                    Array.from(modeDropdown.options).forEach(opt => {
+                        opt.selected = allowedModes.includes(opt.value);
+                    });
+                }
+                if (varietyDropdown && allowedVarieties.length > 0) {
+                    Array.from(varietyDropdown.options).forEach(opt => {
+                        opt.selected = allowedVarieties.includes(opt.value);
+                    });
+                }
+            }
+        });
+
+         
+         
     }
 
     function enableAllOptions(dropdownId) {
@@ -137,6 +160,7 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     }
 
     // Update progress bar based on completed dropdowns
+    // Update progress bar and storage dropdown logic
     function updateProgress() {
         let completed = 0;
         dropdowns.forEach(id => {
@@ -147,7 +171,24 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
 
         const percentage = (completed / dropdowns.length) * 100;
         progressFill.style.width = percentage + '%';
-        
+
+        // Storage Solution dropdown logic
+        const wellDefined = document.getElementById('Welldefined');
+        const involvesML = document.getElementById('involvesML');
+        const unstructuredData = document.getElementById('unstructuredData');
+        const storageDropdown = document.getElementById('storagesolution');
+
+        if (
+            wellDefined && wellDefined.value === 'Yes' &&
+            involvesML && involvesML.value === 'No' &&
+            unstructuredData && unstructuredData.value === 'No'
+        ) {
+            storageDropdown && (storageDropdown.disabled = false);
+        } else {
+            storageDropdown && (storageDropdown.disabled = true);
+            if (storageDropdown) storageDropdown.value = '';
+        }
+
         // Add visual feedback when complete
         if (completed === dropdowns.length) {
             progressFill.style.background = 'linear-gradient(90deg, #00ff88 0%, #4CAF50 100%)';
@@ -174,50 +215,117 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     });
 
     // Populate matrix table with data
-    function populateMatrix(data) {
-        matrixBody.innerHTML = '';
+//     function populateMatrix(data) {
+//         matrixBody.innerHTML = '';
         
-        if (!data || data.length === 0) {
-            console.error('No data to populate matrix');
-            return;
-        }
+//         if (!data || data.length === 0) {
+//             console.error('No data to populate matrix');
+//             return;
+//         }
         
-        data.forEach((row, index) => {
-            const tr = document.createElement('tr');
-            tr.dataset.rowIndex = index;
-            
-            // Backend structure: [rank, score, cloud, sourcetype, mode, datalake, dataingestion, tools, workflow, involvesml, welldefined]
-            // Desired order: Rank, Cloud, Source Type, Mode, Data Ingestion, Workflow Orchestration, Data Transformation (tools), Data Lake/Warehouse
-            
-            // Reorder columns to match your requirements
-            const reorderedRow = [
-                row[0],  // Rank
-                row[2],  // Cloud
-                row[3],  // Source Type
-                row[4],  // Mode
-                row[6],  // Data Ingestion
-                row[8],  // Workflow Orchestration
-                row[7],  // Data Transformation (tools)
-                row[5],  // Data Lake/Warehouse
-            ];
-            
-            // Add cells in the new order
-            reorderedRow.forEach(cell => {
-                const td = document.createElement('td');
-                td.textContent = cell;
-                tr.appendChild(td);
-            });
-            
-            // Add click handler for row selection - pass original row data
-            tr.addEventListener('click', function() {
-                handleRowSelection(this, row);
-            });
-            
-            matrixBody.appendChild(tr);
-        });
+//       data.forEach((row, index) => {
+//     const tr = document.createElement('tr');
+//     tr.dataset.rowIndex = index;
+
+//     const reorderedRow = [
+//         row[0],  // Rank
+//         row[2],  // Cloud
+//         row[3],  // Source Type
+//         row[4],  // Mode
+//         row[6],  // Data Ingestion
+//         row[8],  // Workflow Orchestration
+//         row[7],  // Data Transformation
+//         row[5],  // Data Lake/Warehouse
+//     ];
+
+//     // ✅ Add normal cells
+//     reorderedRow.forEach(cell => {
+//         const td = document.createElement('td');
+//         td.textContent = cell;
+//         tr.appendChild(td);
+//     });
+
+//     // ✅ Add Expand Button
+//     const expandTd = document.createElement('td');
+//     expandTd.innerHTML = `<button class="expand-btn">▶ Expand</button>`;
+//     tr.appendChild(expandTd);
+
+//     // Expand click
+//     expandTd.querySelector("button").addEventListener("click", function (e) {
+//         e.stopPropagation();
+//         handleRowSelection(tr, row);
+//     });
+
+//     matrixBody.appendChild(tr);
+// });
+
+// // ✅ Add Expand Button Column
+// const expandTd = document.createElement('td');
+// expandTd.innerHTML = `<button class="expand-btn">▶ Expand</button>`;
+// tr.appendChild(expandTd);
+
+// // Store row data in dataset
+// tr.dataset.rowData = JSON.stringify(row);
+
+// // Expand button click
+// expandTd.querySelector("button").addEventListener("click", function (e) {
+//     e.stopPropagation(); // prevent row click
+//     handleRowSelection(tr, row);
+// });
+
+//             matrixBody.appendChild(tr);
+//         });
+
+//             }      
+
+function populateMatrix(data) {
+    matrixBody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        console.error('No data to populate matrix');
+        return;
     }
 
-    // Helper function to convert basic Markdown to HTML
+    data.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        tr.dataset.rowIndex = index;
+
+        const reorderedRow = [
+            row[0],  // Rank
+            row[2],  // Cloud
+            row[3],  // Source Type
+            row[4],  // Mode
+            row[6],  // Data Ingestion
+            row[8],  // Workflow Orchestration
+            row[7],  // Data Transformation
+            row[5],  // Data Lake/Warehouse
+        ];
+
+        // Add normal cells
+        reorderedRow.forEach(cell => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+        });
+
+        // Add Expand button cell (ONLY ONCE)
+        const expandTd = document.createElement('td');
+        expandTd.innerHTML = `<button class="expand-btn">▶ Expand</button>`;
+        tr.appendChild(expandTd);
+
+        // Store row data
+        tr.dataset.rowData = JSON.stringify(row);
+
+        // Expand click event
+        expandTd.querySelector("button").addEventListener("click", function (e) {
+            e.stopPropagation();
+            handleRowSelection(tr, row);
+        });
+
+        matrixBody.appendChild(tr);
+    });
+}
+// Helper function to convert basic Markdown to HTML
     function parseMarkdown(text) {
         if (!text) return '';
         
@@ -254,75 +362,76 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     }
 
     // Handle row selection and JSON display
-    function handleRowSelection(rowElement, rowData) {
-        // Remove previous selection
-        const previousSelected = matrixBody.querySelector('tr.selected');
-        if (previousSelected) {
-            previousSelected.classList.remove('selected');
-        }
+    // function handleRowSelection(rowElement, rowData) {
+    //     // Remove previous selection
+    //     const previousSelected = matrixBody.querySelector('tr.selected');
+    //     if (previousSelected) {
+    //         previousSelected.classList.remove('selected');
+    //     }
         
-        // Add selection to clicked row
-        rowElement.classList.add('selected');
+    //     // Add selection to clicked row
+    //     rowElement.classList.add('selected');
         
-        // Create JSON object matching your backend structure
-        // rowData: [rank, score, cloud, sourcetype, mode, datalake, dataingestion, tools, workflow, involvesml, welldefined]
-        const jsonData = {
-            rank: rowData[0],
-            cloud: rowData[2],
-            source_type: rowData[3],
-            mode: rowData[4],
-            data_ingestion: rowData[6],
-            workflow_orchestration: rowData[8],
-            data_transformation: rowData[7],
-            datalake_warehouse: rowData[5],
-            score: rowData[1],
-            involves_ml: rowData[9],
-            well_defined: rowData[10]
-        };
+    //     // Create JSON object matching your backend structure
+    //     // rowData: [rank, score, cloud, sourcetype, mode, datalake, dataingestion, tools, workflow, involvesml, welldefined]
+    //     const jsonData = {
+    //         rank: rowData[0],
+    //         cloud: rowData[2],
+    //         source_type: rowData[3],
+    //         mode: rowData[4],
+    //         data_ingestion: rowData[6],
+    //         workflow_orchestration: rowData[8],
+    //         data_transformation: rowData[7],
+    //         datalake_warehouse: rowData[5],
+    //         score: rowData[1],
+    //         involves_ml: rowData[9],
+    //         well_defined: rowData[10]
+    //     };
         
-        // Show loading state while fetching from Gemini - USE innerHTML
-        jsonCode.innerHTML = '<p style="text-align: center; color: #4CAF50;"><strong>⏳ Generating architecture details...</strong></p><p>Please wait while we create a comprehensive architecture explanation for your selected configuration.</p>';
-        jsonContainer.classList.add('show');
+    //     // Show loading state while fetching from Gemini - USE innerHTML
+    //     jsonCode.innerHTML = '<p style="text-align: center; color: #4CAF50;"><strong>⏳ Generating architecture details...</strong></p><p>Please wait while we create a comprehensive architecture explanation for your selected configuration.</p>';
+    //     jsonContainer.classList.add('show');
         
-        // Scroll to JSON container
-        setTimeout(() => {
-            jsonContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+    //     // Scroll to JSON container
+    //     setTimeout(() => {
+    //         jsonContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //     }, 100);
         
-        console.log('Selected architecture:', jsonData);
+    //     console.log('Selected architecture:', jsonData);
         
-        // Call Gemini to get detailed architecture explanation
-        fetch('http://localhost:8000/gemini-conversation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(jsonData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Gemini API response:', data);
+    //     // Call Gemini to get detailed architecture explanation
+    //     fetch('http://127.0.0.1:5000/api/expand_architecture', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify(jsonData)
+    //     })
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(data => {
+    //         console.log('Gemini API response:', data);
             
-            // Display the Gemini-generated architecture explanation
-            if (data.response) {
-                // Parse Markdown and render as HTML - USE innerHTML
-                const htmlContent = parseMarkdown(data.response);
-                jsonCode.innerHTML = htmlContent;
-                console.log('Architecture Details:', data.response);
-            } else {
-                jsonCode.innerHTML = '<p style="color: #ff9800;">No architecture details received from the server.</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Gemini API error:', error);
-            jsonCode.innerHTML = `<p style="color: #f44336;"><strong>❌ Error generating architecture details:</strong></p><p>${error.message}</p><p>Please try again or check the console for more details.</p>`;
-        });
-    }
+    //         // Display the Gemini-generated architecture explanation
+    //         if (data.architecture_explanation) {
+    //             // Parse Markdown and render as HTML - USE innerHTML
+    //             const htmlContent = parseMarkdown(data.architecture_explanation);
+    //             jsonCode.innerHTML = htmlContent;
+    //             console.log('Architecture Details:', data.architecture_explanation);
+    //         } else {
+    //             jsonCode.innerHTML = '<p style="color: #ff9800;">No architecture details received from the server.</p>';
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.error('Gemini API error:', error);
+    //         jsonCode.innerHTML = `<p style="color: #f44336;"><strong>❌ Error generating architecture details:</strong></p><p>${error.message}</p><p>Please try again or check the console for more details.</p>`;
+    //     });
+    // }
+
 
 
     // Handle Go button click - ONLY API CALLS
@@ -888,29 +997,40 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
         if(involvesML) involvesML.value = 'No';
         if(unstructuredData) unstructuredData.value = 'No';
 
-        function updateStorageDecision() {
-            if (!wellDefined || !storageSolution) return;
+      let storageAutoSet = false;
 
-            // RULE: Well Defined = Yes AND Involves ML = No AND Unstructured Data = No → Data Warehouse
-            // Everything else → Data Lake
-            if (
-                wellDefined.value === 'Yes' &&
-                involvesML.value === 'No' &&
-                unstructuredData.value === 'No'
-            ) {
-                storageSolution.value = 'Data Warehouse';
-            } else {
-                storageSolution.value = 'Data Lake';
-            }
-            
-            if (storageCheckmark) storageCheckmark.classList.add('show');
-            updateProgress();
-        }
+function updateStorageDecision() {
+    const allowBoth = wellDefined.value === 'Yes' &&
+                      involvesML.value === 'No' &&
+                      unstructuredData.value === 'No';
+
+    const lakeOption = storageSolution.querySelector("option[value='Data Lake']");
+    const warehouseOption = storageSolution.querySelector("option[value='Data Warehouse']");
+
+    if (allowBoth) {
+        lakeOption.disabled = false;
+        warehouseOption.disabled = false;
+    } else {
+        warehouseOption.disabled = true;
+        storageSolution.value = 'Data Lake';
+    }
+}
+
+
 
         // Attach Storage listeners
         [wellDefined, involvesML, unstructuredData].forEach(el => {
             if(el) el.addEventListener('change', updateStorageDecision);
         });
+        const closeApiArchitecture = document.getElementById('closeApiArchitecture');
+    if (closeApiArchitecture) {
+        closeApiArchitecture.addEventListener('click', function() {
+            const container = document.getElementById('apiArchitectureContainer');
+            if (container) {
+                container.style.display = 'none';
+            }
+        });
+    }
 
         // 5. Final Initializations
         updateStorageDecision(); 
@@ -1062,78 +1182,231 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
 
 
     // ===== POPULATE API RESULTS TABLE (FIRST 10 ROWS) =====
+    // function populateAPIResultsTable(data) {
+    //     const apiResultsBody = document.getElementById('apiResultsBody');
+    //     const apiResultsContainer = document.getElementById('apiResultsContainer');
+        
+    //     if (!apiResultsBody) {
+    //         console.error('❌ apiResultsBody element not found');
+    //         return;
+    //     }
+        
+    //     // Clear existing rows
+    //     apiResultsBody.innerHTML = '';
+
+    //     console.log('📊 Populating table with data:', data);
+    //     console.log('📊 Total rows received:', data.length);
+
+    //     if (!data || data.length === 0) {
+    //         const tr = document.createElement('tr');
+    //         tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+    //         apiResultsBody.appendChild(tr);
+    //         return;
+    //     }
+
+    //     // ✅ LIMIT TO FIRST 10 ROWS
+    //     const limitedData = data.slice(0, 10);
+    //     console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
+
+    //     // Populate each row
+    //     limitedData.forEach((item, index) => {
+    //         const tr = document.createElement('tr');
+    //         tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+            
+    //         // Extract fields from the API response
+    //         const cloud = item.cloud || 'N/A';
+    //         const sourceType = item.source_type || 'N/A';
+    //         const mode = item.mode || 'N/A';
+    //         const ingestionTool = item.ingestion_tool || 'N/A';
+    //         const orchestrationTool = item.orchestration_tool || 'N/A';
+    //         const transformationTool = item.transformation_tool || 'N/A';
+    //         const dataStorage = item.data_storage || 'N/A';
+            
+    //         tr.innerHTML = `
+    //             <td>${cloud}</td>
+    //             <td>${sourceType}</td>
+    //             <td>${mode}</td>
+    //             <td>${ingestionTool}</td>
+    //             <td>${orchestrationTool}</td>
+    //             <td>${transformationTool}</td>
+    //             <td>${dataStorage}</td>
+    //         `;
+            
+    //         apiResultsBody.appendChild(tr);
+            
+    //         console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
+    //     });
+        
+    //     // Show message if more rows exist
+    //     if (data.length > 10) {
+    //         const infoTr = document.createElement('tr');
+    //         infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
+    //         apiResultsBody.appendChild(infoTr);
+    //     }
+        
+    //     // Ensure container is visible
+    //     if (apiResultsContainer) {
+    //         apiResultsContainer.style.display = 'block';
+    //         apiResultsContainer.classList.add('show');
+    //         console.log('✓ API Results container made visible');
+    //     }
+        
+    //     console.log(`✅ Successfully populated ${limitedData.length} rows`);
+    // }
     function populateAPIResultsTable(data) {
-        const apiResultsBody = document.getElementById('apiResultsBody');
-        const apiResultsContainer = document.getElementById('apiResultsContainer');
-        
-        if (!apiResultsBody) {
-            console.error('❌ apiResultsBody element not found');
-            return;
-        }
-        
-        // Clear existing rows
-        apiResultsBody.innerHTML = '';
+    const apiResultsBody = document.getElementById('apiResultsBody');
+    const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+    if (!apiResultsBody) {
+        console.error('❌ apiResultsBody element not found');
+        return;
+    }
+    
+    // Clear existing rows
+    apiResultsBody.innerHTML = '';
 
-        console.log('📊 Populating table with data:', data);
-        console.log('📊 Total rows received:', data.length);
+    console.log('📊 Populating table with data:', data);
+    console.log('📊 Total rows received:', data.length);
 
-        if (!data || data.length === 0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
-            apiResultsBody.appendChild(tr);
-            return;
-        }
-
-        // ✅ LIMIT TO FIRST 10 ROWS
-        const limitedData = data.slice(0, 10);
-        console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
-
-        // Populate each row
-        limitedData.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
-            
-            // Extract fields from the API response
-            const cloud = item.cloud || 'N/A';
-            const sourceType = item.source_type || 'N/A';
-            const mode = item.mode || 'N/A';
-            const ingestionTool = item.ingestion_tool || 'N/A';
-            const orchestrationTool = item.orchestration_tool || 'N/A';
-            const transformationTool = item.transformation_tool || 'N/A';
-            const dataStorage = item.data_storage || 'N/A';
-            
-            tr.innerHTML = `
-                <td>${cloud}</td>
-                <td>${sourceType}</td>
-                <td>${mode}</td>
-                <td>${ingestionTool}</td>
-                <td>${orchestrationTool}</td>
-                <td>${transformationTool}</td>
-                <td>${dataStorage}</td>
-            `;
-            
-            apiResultsBody.appendChild(tr);
-            
-            console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
-        });
-        
-        // Show message if more rows exist
-        if (data.length > 10) {
-            const infoTr = document.createElement('tr');
-            infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
-            apiResultsBody.appendChild(infoTr);
-        }
-        
-        // Ensure container is visible
-        if (apiResultsContainer) {
-            apiResultsContainer.style.display = 'block';
-            apiResultsContainer.classList.add('show');
-            console.log('✓ API Results container made visible');
-        }
-        
-        console.log(`✅ Successfully populated ${limitedData.length} rows`);
+    if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+        apiResultsBody.appendChild(tr);
+        return;
     }
 
+    // ✅ LIMIT TO FIRST 10 ROWS
+    const limitedData = data.slice(0, 10);
+    console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
+
+    // Populate each row
+    limitedData.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+        
+        // Extract fields from the API response
+        const cloud = item.cloud || 'N/A';
+        const sourceType = item.source_type || 'N/A';
+        const mode = item.mode || 'N/A';
+        const ingestionTool = item.ingestion_tool || 'N/A';
+        const orchestrationTool = item.orchestration_tool || 'N/A';
+        const transformationTool = item.transformation_tool || 'N/A';
+        const dataStorage = item.data_storage || 'N/A';
+        
+        tr.innerHTML = `
+            <td>${cloud}</td>
+            <td>${sourceType}</td>
+            <td>${mode}</td>
+            <td>${ingestionTool}</td>
+            <td>${orchestrationTool}</td>
+            <td>${transformationTool}</td>
+            <td>${dataStorage}</td>
+            <td><button class="expand-btn">▶ Expand</button></td>
+        `;
+        
+        // Add expand button click handler
+        const expandBtn = tr.querySelector('.expand-btn');
+        expandBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            handleRowExpand(item, index);
+        });
+        
+        apiResultsBody.appendChild(tr);
+        
+        console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
+    });
+    
+    // Show message if more rows exist
+    if (data.length > 10) {
+        const infoTr = document.createElement('tr');
+        infoTr.innerHTML = `<td colspan="8" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
+        apiResultsBody.appendChild(infoTr);
+    }
+    
+    // Ensure container is visible
+    if (apiResultsContainer) {
+        apiResultsContainer.style.display = 'block';
+        apiResultsContainer.classList.add('show');
+        console.log('✓ API Results container made visible');
+    }
+    
+    console.log(`✅ Successfully populated ${limitedData.length} rows`);
+}
+
+
+// Handle expand button clicks for API results
+function handleRowExpand(rowData, rowIndex) {
+    console.log('🔍 Expanding row:', rowIndex + 1, rowData);
+    
+    const architectureContainer = document.getElementById('apiArchitectureContainer');
+    const architectureCode = document.getElementById('apiArchitectureCode');
+    
+    if (!architectureContainer || !architectureCode) {
+        console.error('❌ Architecture container elements not found');
+        alert('Error: Architecture display elements not found. Please check the HTML.');
+        return;
+    }
+    
+    // Prepare data for Gemini API
+    const jsonData = {
+        cloud: rowData.cloud,
+        source_type: rowData.source_type,
+        mode: rowData.mode,
+        data_ingestion: rowData.ingestion_tool,
+        workflow_orchestration: rowData.orchestration_tool,
+        data_transformation: rowData.transformation_tool,
+        datalake_warehouse: rowData.data_storage,
+        involves_ml: document.getElementById('involvesML')?.value || 'N/A',
+        well_defined: document.getElementById('Welldefined')?.value || 'N/A',
+        rank: rowIndex + 1,
+        score: 0  // You can add scoring logic if needed
+    };
+    
+    // Show loading state
+    architectureCode.innerHTML = '<p style="text-align: center; color: #4CAF50;"><strong>⏳ Generating architecture details...</strong></p><p>Please wait while we create a comprehensive architecture explanation for your selected configuration.</p>';
+    architectureContainer.style.display = 'block';
+    
+    // Scroll to architecture container
+    setTimeout(() => {
+        architectureContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+    
+    console.log('📤 Sending to Gemini API:', jsonData);
+    
+    // Call Gemini API
+    fetch('http://127.0.0.1:5000/api/expand_architecture', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Gemini API response received:', data);
+        
+        if (data.architecture_explanation) {
+            const htmlContent = parseMarkdown(data.architecture_explanation);
+            architectureCode.innerHTML = htmlContent;
+            console.log('✅ Architecture details displayed');
+        } else {
+            architectureCode.innerHTML = '<p style="color: #ff9800;">⚠️ No architecture details received from the server.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('❌ Gemini API error:', error);
+        architectureCode.innerHTML = `
+            <p style="color: #f44336;"><strong>❌ Error generating architecture details:</strong></p>
+            <p>${error.message}</p>
+            <p>Please try again or check the console for more details.</p>
+        `;
+    });
+}
 
     // ===== FINAL SUBMIT BUTTON =====
     const finalGoButton = document.getElementById('finalGoButton');

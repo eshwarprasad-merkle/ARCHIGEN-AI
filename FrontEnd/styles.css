@@ -108,7 +108,7 @@ body {
 
 .form-container {
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+   
     border-radius: 24px;
     padding: 40px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -718,6 +718,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    min-height: 300px;
     flex: 1;
     align-content: start;
     margin-bottom: 20px;
@@ -772,10 +773,10 @@ body {
     border: 2px solid rgba(102, 126, 234, 0.5);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    max-height: 200px;
+    max-height: 300px !important;
     overflow-y: auto;
     z-index: 1000;
-    backdrop-filter: blur(10px);
+   
 }
 
 .suggestions-list {
@@ -790,6 +791,9 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 14px;
+     font-size: 14px;
+    background: transparent;
+    backdrop-filter: none !important;
 }
 
 .suggestion-item:hover,
@@ -1240,7 +1244,6 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
-
 .source-input-group .dropdown {
     width: 100%;
     padding: 14px 16px;
@@ -1251,8 +1254,10 @@ body {
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
+    backdrop-filter: none !important;
+   
+    filter: none !important;
 }
-
 .source-input-group .dropdown:hover {
     border-color: rgba(102, 126, 234, 0.7);
     background-color: rgba(102, 126, 234, 0.1);
@@ -1658,3 +1663,16 @@ body {
 .api-results-container.show {
     display: block !important;
 }
+.expand-btn {
+    background: linear-gradient(135deg, #6a5acd, #00bcd4);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.expand-btn:hover {
+    background: #00e5ff;
+}
+
