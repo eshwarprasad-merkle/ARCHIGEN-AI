@@ -133,9 +133,9 @@ def get_filtered_technologies():
                 # Logic: Fetch tools matching the selected cloud OR where cloud is NULL
                 # This covers agnostic tools like Python, Docker, Spark, etc.
                 query = """
-                    SELECT * 
+                   SELECT tool
                     FROM tech_stack 
-                    WHERE cloud = ? 
+                    WHERE cloud = ? or cloud IS NULL 
                 """
                 cursor.execute(query, (cloud,))
                 tech_list = [row[0] for row in cursor.fetchall()]
@@ -342,4 +342,5 @@ def get_techstack():
 if __name__ == "__main__":
     # Pre-load settings from DB
     load_environment_variables()
+
     app.run(debug=True, port=5000)
