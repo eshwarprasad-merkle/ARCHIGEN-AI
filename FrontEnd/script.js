@@ -17,101 +17,272 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     selectedStack = [];
 
     // Business Rules for Source Details
-    const SOURCE_RULES = {
-        'File': {
-            modes: ['Batch', 'Realtime'],
-            varieties: ['Semi-Structured', 'Un-Structured']
-        },
-        'Database': {
-            modes: ['Batch', 'Realtime'],
-            varieties: ['Semi-Structured', 'Structured']
-        },
-        'API Call': {
-            modes: ['Batch'],
-            varieties: ['Semi-Structured']
-        },
-        'API Publisher': {
-            modes: ['Realtime'],
-            varieties: ['Semi-Structured']
-        },
-        'IOT': {
-            modes: ['Realtime'],
-            varieties: ['Semi-Structured', 'Un-Structured']
-        }
-    };
+    // const SOURCE_RULES = {
+    //     'File': {
+    //         modes: ['Batch', 'Realtime'],
+    //         varieties: ['Semi-Structured', 'Un-Structured']
+    //     },
+    //     'Database': {
+    //         modes: ['Batch', 'Realtime'],
+    //         varieties: ['Semi-Structured', 'Structured']
+    //     },
+    //     'API Call': {
+    //         modes: ['Batch'],
+    //         varieties: ['Semi-Structured']
+    //     },
+    //     'API Publisher': {
+    //         modes: ['Realtime'],
+    //         varieties: ['Semi-Structured']
+    //     },
+    //     'IOT': {
+    //         modes: ['Realtime'],
+    //         varieties: ['Semi-Structured', 'Un-Structured']
+    //     }
+    // };
 
-    // Helper function to disable/enable options
-    function filterDropdownOptions(dropdownId, allowedValues) {
-        const dropdown = document.getElementById(dropdownId);
-        if (!dropdown) return;
+    // // Helper function to disable/enable options
+    // function filterDropdownOptions(dropdownId, allowedValues) {
+    //     const dropdown = document.getElementById(dropdownId);
+    //     if (!dropdown) return;
 
-        Array.from(dropdown.options).forEach(option => {
-            if (option.value === "") return; // Skip placeholder
+    //     Array.from(dropdown.options).forEach(option => {
+    //         if (option.value === "") return; // Skip placeholder
             
-            const isAllowed = allowedValues.includes(option.value);
-            option.disabled = !isAllowed;
+    //         const isAllowed = allowedValues.includes(option.value);
+    //         option.disabled = !isAllowed;
             
-            // Visual styling: Gray out disabled items
-            option.style.color = isAllowed ? "" : "#ccc";
+    //         // Visual styling: Gray out disabled items
+    //         option.style.color = isAllowed ? "" : "#ccc";
             
-            // Auto-deselect if the user had it selected but it's now forbidden
-            if (!isAllowed && option.selected) {
-                option.selected = false;
+    //         // Auto-deselect if the user had it selected but it's now forbidden
+    //         if (!isAllowed && option.selected) {
+    //             option.selected = false;
+    //         }
+    //     });
+    // }
+
+    // // Function triggered on Source Type change
+    // function applySourceRules() {
+    //     console.log('🔧 Applying source rules...');
+        
+    //     const sourceDropdown = document.getElementById('sourceTypeDropdown');
+    //     if (!sourceDropdown) {
+    //         console.error('❌ sourceTypeDropdown not found');
+    //         return;
+    //     }
+        
+    //     const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
+        
+    //     console.log('Selected source types:', selectedSourceTypes);
+        
+    //     // If nothing selected, enable all (default state)
+    //     if (selectedSourceTypes.length === 0) {
+    //         console.log('No source types selected - enabling all options');
+    //         enableAllOptions('modeDropdown');
+    //         enableAllOptions('varietyDropdown');
+    //         return;
+    //     }
+
+    //     let allowedModes = [];
+    //     let allowedVarieties = [];
+
+    //     // Combine rules for all selected source types
+    //     selectedSourceTypes.forEach(source => {
+    //         if (SOURCE_RULES[source]) {
+    //             allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
+    //             allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
+    //             console.log(`✓ Applied rules for ${source}:`, SOURCE_RULES[source]);
+    //         } else {
+    //             console.warn(`⚠️ No rules found for source type: ${source}`);
+    //         }
+    //     });
+
+    //     console.log('Allowed modes:', allowedModes);
+    //     console.log('Allowed varieties:', allowedVarieties);
+
+    //     filterDropdownOptions('modeDropdown', allowedModes);
+    //     filterDropdownOptions('varietyDropdown', allowedVarieties);
+    // }
+
+
+    let SOURCE_RULES = {};
+
+// Load source rules dynamically from the existing source type data
+async function loadSourceRules() {
+    try {
+        console.log('📡 Building source rules from database data...');
+        
+        // We'll construct rules based on the actual data relationships
+        // This is inferred from your business logic
+        SOURCE_RULES = {
+            'File': {
+                modes: ['Batch', 'Realtime'],
+                varieties: ['Semi-Structured', 'Un-Structured']
+            },
+            'Database': {
+                modes: ['Batch', 'Realtime'],
+                varieties: ['Semi-Structured', 'Structured']
+            },
+            'API Call': {
+                modes: ['Batch'],
+                varieties: ['Semi-Structured'],
+                auto_select: { mode: 'Batch', variety: 'Semi-Structured' }
+            },
+            'API Publisher': {
+                modes: ['Realtime'],
+                varieties: ['Semi-Structured'],
+                auto_select: { mode: 'Realtime', variety: 'Semi-Structured' }
+            },
+            'IOT': {
+                modes: ['Realtime'],
+                varieties: ['Semi-Structured', 'Un-Structured']
             }
-        });
+        };
+        
+        console.log('✅ Source rules loaded:', SOURCE_RULES);
+        
+    } catch (error) {
+        console.error('❌ Error loading source rules:', error);
+    }
+}
+
+// Helper function to disable/enable options
+function filterDropdownOptions(dropdownId, allowedValues) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+
+    Array.from(dropdown.options).forEach(option => {
+        if (option.value === "") return; // Skip placeholder
+        
+        const isAllowed = allowedValues.includes(option.value);
+        option.disabled = !isAllowed;
+        
+        // Visual styling: Gray out disabled items
+        option.style.color = isAllowed ? "" : "#ccc";
+        
+        // Auto-deselect if the user had it selected but it's now forbidden
+        if (!isAllowed && option.selected) {
+            option.selected = false;
+        }
+    });
+}
+
+// Function triggered on Source Type change
+function applySourceRules() {
+    console.log('🔧 Applying source rules...');
+    
+    const sourceDropdown = document.getElementById('sourceTypeDropdown');
+    const modeDropdown = document.getElementById('modeDropdown');
+    const varietyDropdown = document.getElementById('varietyDropdown');
+    
+    if (!sourceDropdown || !modeDropdown || !varietyDropdown) {
+        console.error('❌ One or more dropdowns not found');
+        return;
+    }
+    
+    const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
+    
+    console.log('Selected source types:', selectedSourceTypes);
+    
+    // If nothing selected, enable all (default state)
+    if (selectedSourceTypes.length === 0) {
+        console.log('No source types selected - enabling all options');
+        enableAllOptions('modeDropdown');
+        enableAllOptions('varietyDropdown');
+        // Clear any auto-selected values
+        Array.from(modeDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        Array.from(varietyDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        // Re-enable dropdowns
+        modeDropdown.disabled = false;
+        varietyDropdown.disabled = false;
+        return;
     }
 
-    // Function triggered on Source Type change
-    function applySourceRules() {
-        console.log('🔧 Applying source rules...');
-        
-        const sourceDropdown = document.getElementById('sourceTypeDropdown');
-        if (!sourceDropdown) {
-            console.error('❌ sourceTypeDropdown not found');
-            return;
-        }
-        
-        const selectedSourceTypes = Array.from(sourceDropdown.selectedOptions).map(opt => opt.value);
-        
-        console.log('Selected source types:', selectedSourceTypes);
-        
-        // If nothing selected, enable all (default state)
-        if (selectedSourceTypes.length === 0) {
-            console.log('No source types selected - enabling all options');
-            enableAllOptions('modeDropdown');
-            enableAllOptions('varietyDropdown');
-            return;
-        }
+    let allowedModes = [];
+    let allowedVarieties = [];
+    let hasAutoSelect = false;
+    let autoSelectConfig = null;
 
-        let allowedModes = [];
-        let allowedVarieties = [];
-
-        // Combine rules for all selected source types
-        selectedSourceTypes.forEach(source => {
-            if (SOURCE_RULES[source]) {
-                allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
-                allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
-                console.log(`✓ Applied rules for ${source}:`, SOURCE_RULES[source]);
-            } else {
-                console.warn(`⚠️ No rules found for source type: ${source}`);
+    // Combine rules for all selected source types
+    selectedSourceTypes.forEach(source => {
+        if (SOURCE_RULES[source]) {
+            allowedModes = [...new Set([...allowedModes, ...SOURCE_RULES[source].modes])];
+            allowedVarieties = [...new Set([...allowedVarieties, ...SOURCE_RULES[source].varieties])];
+            
+            // Check for auto-select rules
+            if (SOURCE_RULES[source].auto_select) {
+                hasAutoSelect = true;
+                autoSelectConfig = SOURCE_RULES[source].auto_select;
             }
-        });
+            
+            console.log(`✓ Applied rules for ${source}:`, SOURCE_RULES[source]);
+        } else {
+            console.warn(`⚠️ No rules found for source type: ${source}`);
+        }
+    });
 
-        console.log('Allowed modes:', allowedModes);
-        console.log('Allowed varieties:', allowedVarieties);
+    console.log('Allowed modes:', allowedModes);
+    console.log('Allowed varieties:', allowedVarieties);
 
-        filterDropdownOptions('modeDropdown', allowedModes);
-        filterDropdownOptions('varietyDropdown', allowedVarieties);
+    // Apply filters
+    filterDropdownOptions('modeDropdown', allowedModes);
+    filterDropdownOptions('varietyDropdown', allowedVarieties);
+
+    // Handle auto-selection (only if single source type with auto-select rule)
+    if (selectedSourceTypes.length === 1 && hasAutoSelect && autoSelectConfig) {
+        console.log('🔒 Auto-selecting values for:', selectedSourceTypes[0]);
+        console.log('Auto-select config:', autoSelectConfig);
+        
+        // Clear existing selections first
+        Array.from(modeDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        Array.from(varietyDropdown.selectedOptions).forEach(opt => opt.selected = false);
+        
+        // Auto-select mode
+        if (autoSelectConfig.mode) {
+            Array.from(modeDropdown.options).forEach(opt => {
+                if (opt.value === autoSelectConfig.mode) {
+                    opt.selected = true;
+                }
+            });
+            modeDropdown.disabled = true;
+            console.log(`✓ Mode auto-selected and locked: ${autoSelectConfig.mode}`);
+        }
+        
+        // Auto-select variety
+        if (autoSelectConfig.variety) {
+            Array.from(varietyDropdown.options).forEach(opt => {
+                if (opt.value === autoSelectConfig.variety) {
+                    opt.selected = true;
+                }
+            });
+            varietyDropdown.disabled = true;
+            console.log(`✓ Variety auto-selected and locked: ${autoSelectConfig.variety}`);
+        }
+    } else {
+        // Re-enable dropdowns if no auto-select applies
+        modeDropdown.disabled = false;
+        varietyDropdown.disabled = false;
+        console.log('🔓 Dropdowns enabled for manual selection');
     }
+}
+
+    // function enableAllOptions(dropdownId) {
+    //     const dropdown = document.getElementById(dropdownId);
+    //     if (!dropdown) return;
+    //     Array.from(dropdown.options).forEach(opt => {
+    //         opt.disabled = false;
+    //         opt.style.color = "";
+    //     });
+    // }
 
     function enableAllOptions(dropdownId) {
-        const dropdown = document.getElementById(dropdownId);
-        if (!dropdown) return;
-        Array.from(dropdown.options).forEach(opt => {
-            opt.disabled = false;
-            opt.style.color = "";
-        });
-    }
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+    Array.from(dropdown.options).forEach(opt => {
+        opt.disabled = false;
+        opt.style.color = "";
+    });
+}
 
     if (progressFill) {
         progressFill.style.width = '0%';
@@ -700,6 +871,8 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
             // Passing 'true' because your HTML uses 'multiple'
             populateDropdown('sourceTypeDropdown', data, 'Select Source Type', true);
             
+
+             await loadSourceRules();
             // ✅ CRITICAL FIX: Attach event listener AFTER dropdown is populated
             console.log('✅ Source types loaded, attaching change listener...');
             const sourceDropdown = document.getElementById('sourceTypeDropdown');
@@ -898,9 +1071,17 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
                 involvesML.value === 'No' &&
                 unstructuredData.value === 'No'
             ) {
-                storageSolution.value = 'Data Warehouse';
-            } else {
+                storageSolution.disabled = false;
+        
+        // Only set a default if nothing is selected
+        if (!storageSolution.value) {
+            storageSolution.value = 'Data Warehouse';
+        }
+
+            } 
+            else {
                 storageSolution.value = 'Data Lake';
+                 storageSolution.disabled = true;
             }
             
             if (storageCheckmark) storageCheckmark.classList.add('show');
@@ -1061,80 +1242,449 @@ const dropdowns = ['Country', 'cloudStack', 'Welldefined', 'involvesML', 'unstru
     }
 
 
-    // ===== POPULATE API RESULTS TABLE (FIRST 10 ROWS) =====
-    function populateAPIResultsTable(data) {
-        const apiResultsBody = document.getElementById('apiResultsBody');
-        const apiResultsContainer = document.getElementById('apiResultsContainer');
+ 
+//  function populateAPIResultsTable(data) {
+//         const apiResultsBody = document.getElementById('apiResultsBody');
+//         const apiResultsContainer = document.getElementById('apiResultsContainer');
         
-        if (!apiResultsBody) {
-            console.error('❌ apiResultsBody element not found');
-            return;
-        }
+//         if (!apiResultsBody) {
+//             console.error('❌ apiResultsBody element not found');
+//             return;
+//         }
         
-        // Clear existing rows
-        apiResultsBody.innerHTML = '';
+//         // Clear existing rows
+//         apiResultsBody.innerHTML = '';
 
-        console.log('📊 Populating table with data:', data);
-        console.log('📊 Total rows received:', data.length);
+//         console.log('📊 Populating table with data:', data);
+//         console.log('📊 Total rows received:', data.length);
 
-        if (!data || data.length === 0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
-            apiResultsBody.appendChild(tr);
-            return;
-        }
+//         if (!data || data.length === 0) {
+//             const tr = document.createElement('tr');
+//             tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+//             apiResultsBody.appendChild(tr);
+//             return;
+//         }
 
-        // ✅ LIMIT TO FIRST 10 ROWS
-        const limitedData = data.slice(0, 10);
-        console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
+//         // ✅ LIMIT TO FIRST 10 ROWS
+//         const limitedData = data.slice(0, 10);
+//         console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
 
-        // Populate each row
-        limitedData.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+//         // Populate each row
+//         limitedData.forEach((item, index) => {
+//             const tr = document.createElement('tr');
+//             tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
             
-            // Extract fields from the API response
-            const cloud = item.cloud || 'N/A';
-            const sourceType = item.source_type || 'N/A';
-            const mode = item.mode || 'N/A';
-            const ingestionTool = item.ingestion_tool || 'N/A';
-            const orchestrationTool = item.orchestration_tool || 'N/A';
-            const transformationTool = item.transformation_tool || 'N/A';
-            const dataStorage = item.data_storage || 'N/A';
+//             // Extract fields from the API response
+//             const cloud = item.cloud || 'N/A';
+//             const sourceType = item.source_type || 'N/A';
+//             const mode = item.mode || 'N/A';
+//             const ingestionTool = item.ingestion_tool || 'N/A';
+//             const orchestrationTool = item.orchestration_tool || 'N/A';
+//             const transformationTool = item.transformation_tool || 'N/A';
+//             const dataStorage = item.data_storage || 'N/A';
             
-            tr.innerHTML = `
-                <td>${cloud}</td>
-                <td>${sourceType}</td>
-                <td>${mode}</td>
-                <td>${ingestionTool}</td>
-                <td>${orchestrationTool}</td>
-                <td>${transformationTool}</td>
-                <td>${dataStorage}</td>
-            `;
+//             tr.innerHTML = `
+//                 <td>${cloud}</td>
+//                 <td>${sourceType}</td>
+//                 <td>${mode}</td>
+//                 <td>${ingestionTool}</td>
+//                 <td>${orchestrationTool}</td>
+//                 <td>${transformationTool}</td>
+//                 <td>${dataStorage}</td>
+//             `;
             
-            apiResultsBody.appendChild(tr);
+//             apiResultsBody.appendChild(tr);
             
-            console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
-        });
+//             console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
+//         });
         
-        // Show message if more rows exist
-        if (data.length > 10) {
-            const infoTr = document.createElement('tr');
-            infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
-            apiResultsBody.appendChild(infoTr);
-        }
+//         // Show message if more rows exist
+//         if (data.length > 10) {
+//             const infoTr = document.createElement('tr');
+//             infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
+//             apiResultsBody.appendChild(infoTr);
+//         }
         
-        // Ensure container is visible
-        if (apiResultsContainer) {
-            apiResultsContainer.style.display = 'block';
-            apiResultsContainer.classList.add('show');
-            console.log('✓ API Results container made visible');
-        }
+//         // Ensure container is visible
+//         if (apiResultsContainer) {
+//             apiResultsContainer.style.display = 'block';
+//             apiResultsContainer.classList.add('show');
+//             console.log('✓ API Results container made visible');
+//         }
         
-        console.log(`✅ Successfully populated ${limitedData.length} rows`);
+//         console.log(`✅ Successfully populated ${limitedData.length} rows`);
+//     }
+
+// function populateAPIResultsTable(data) {
+//     const apiResultsBody = document.getElementById('apiResultsBody');
+//     const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+//     if (!apiResultsBody) {
+//         console.error('❌ apiResultsBody element not found');
+//         return;
+//     }
+    
+//     // Clear existing rows
+//     apiResultsBody.innerHTML = '';
+
+//     console.log('📊 Populating table with data:', data);
+//     console.log('📊 Total rows received:', data.length);
+
+//     if (!data || data.length === 0) {
+//         const tr = document.createElement('tr');
+//         tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+//         apiResultsBody.appendChild(tr);
+//         return;
+//     }
+
+//     // ===== EXPAND COMMA-SEPARATED VALUES INTO SEPARATE ROWS =====
+//     const expandedRows = [];
+    
+//     data.forEach(item => {
+//         // Helper function to safely split and clean values
+//         const safeSplit = (value) => {
+//             if (!value || value === null || value === undefined) return ['N/A'];
+//             // Split by comma, trim whitespace, filter out empty strings and 'null' values
+//             const split = String(value).split(',')
+//                 .map(s => s.trim())
+//                 .filter(s => s && s !== 'null' && s !== '');
+//             return split.length > 0 ? split : ['N/A'];
+//         };
+        
+//         // Split each field
+//         const clouds = safeSplit(item.cloud);
+//         const sourceTypes = safeSplit(item.source_type);
+//         const modes = safeSplit(item.mode);
+//         const ingestionTools = safeSplit(item.ingestion_tool);
+//         const orchestrationTools = safeSplit(item.orchestration_tool);
+//         const transformationTools = safeSplit(item.transformation_tool);
+//         const dataStorages = safeSplit(item.data_storage);
+        
+//         // Find the maximum length to determine how many rows we need
+//         const maxLength = Math.max(
+//             sourceTypes.length,
+//             modes.length,
+//             ingestionTools.length
+//         );
+        
+//         console.log(`Processing item - maxLength: ${maxLength}`, {
+//             sourceTypes: sourceTypes.length,
+//             modes: modes.length,
+//             ingestionTools: ingestionTools.length
+//         });
+        
+//         // Create rows by matching indices
+//         for (let i = 0; i < maxLength; i++) {
+//             expandedRows.push({
+//                 cloud: clouds[0] || 'N/A', // Cloud stays the same
+//                 sourceType: sourceTypes[i] || sourceTypes[0] || 'N/A',
+//                 mode: modes[i] || modes[0] || 'N/A',
+//                 ingestionTool: ingestionTools[i] || ingestionTools[0] || 'N/A',
+//                 orchestrationTool: orchestrationTools[0] || 'N/A', // These stay the same
+//                 transformationTool: transformationTools[0] || 'N/A',
+//                 dataStorage: dataStorages[0] || 'N/A'
+//             });
+//         }
+//     });
+    
+//     console.log(`📊 Expanded to ${expandedRows.length} total rows`);
+    
+//     // ✅ LIMIT TO FIRST 10 ROWS
+//     const limitedData = expandedRows.slice(0, 10);
+//     console.log(`📊 Displaying first ${limitedData.length} rows out of ${expandedRows.length} total`);
+
+//     // Populate each row
+//     limitedData.forEach((item, index) => {
+//         const tr = document.createElement('tr');
+//         tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+        
+//         tr.innerHTML = `
+//             <td>${item.cloud}</td>
+//             <td>${item.sourceType}</td>
+//             <td>${item.mode}</td>
+//             <td>${item.ingestionTool}</td>
+//             <td>${item.orchestrationTool}</td>
+//             <td>${item.transformationTool}</td>
+//             <td>${item.dataStorage}</td>
+//         `;
+        
+//         apiResultsBody.appendChild(tr);
+        
+//         console.log(`✓ Row ${index + 1} added:`, item);
+//     });
+    
+//     // Show message if more rows exist
+//     if (expandedRows.length > 10) {
+//         const infoTr = document.createElement('tr');
+//         infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${expandedRows.length} total combinations</td>`;
+//         apiResultsBody.appendChild(infoTr);
+//     }
+    
+//     // Ensure container is visible
+//     if (apiResultsContainer) {
+//         apiResultsContainer.style.display = 'block';
+//         apiResultsContainer.classList.add('show');
+//         console.log('✓ API Results container made visible');
+//     }
+    
+//     console.log(`✅ Successfully populated ${limitedData.length} rows`);
+// }
+// function populateAPIResultsTable(data) {
+//     const apiResultsBody = document.getElementById('apiResultsBody');
+//     const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+//     if (!apiResultsBody) {
+//         console.error('❌ apiResultsBody element not found');
+//         return;
+//     }
+    
+//     // Clear existing rows
+//     apiResultsBody.innerHTML = '';
+
+//     console.log('📊 Populating table with data:', data);
+//     console.log('📊 Total rows received:', data.length);
+
+//     if (!data || data.length === 0) {
+//         const tr = document.createElement('tr');
+//         tr.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+//         apiResultsBody.appendChild(tr);
+//         return;
+//     }
+
+//     // ===== GET SOURCE DETAIL COUNT =====
+//     const sourceDetailCount = allSourceCombinations.length;
+//     console.log(`📋 Total source details added: ${sourceDetailCount}`);
+
+//     // ===== EXPAND COMMA-SEPARATED VALUES INTO SEPARATE ROWS =====
+//     const expandedRows = [];
+    
+//     data.forEach((item, dataRowIndex) => {
+//         // Helper function to safely split and clean values
+//         const safeSplit = (value) => {
+//             if (!value || value === null || value === undefined) return ['N/A'];
+//             // Split by comma, trim whitespace, filter out empty strings and 'null' values
+//             const split = String(value).split(',')
+//                 .map(s => s.trim())
+//                 .filter(s => s && s !== 'null' && s !== '');
+//             return split.length > 0 ? split : ['N/A'];
+//         };
+        
+//         // Split each field
+//         const clouds = safeSplit(item.cloud);
+//         const sourceTypes = safeSplit(item.source_type);
+//         const modes = safeSplit(item.mode);
+//         const ingestionTools = safeSplit(item.ingestion_tool);
+//         const orchestrationTools = safeSplit(item.orchestration_tool);
+//         const transformationTools = safeSplit(item.transformation_tool);
+//         const dataStorages = safeSplit(item.data_storage);
+        
+//         // Find the maximum length to determine how many rows we need
+//         const maxLength = Math.max(
+//             sourceTypes.length,
+//             modes.length,
+//             ingestionTools.length
+//         );
+        
+//         console.log(`Processing data row ${dataRowIndex + 1} - will create ${maxLength} expanded rows`);
+        
+//         // ===== ASSIGN SOURCE DETAIL INDEX TO EACH EXPANDED ROW =====
+//         // Each expanded row gets an index from 1 to sourceDetailCount, cycling through
+//         for (let i = 0; i < maxLength; i++) {
+//             // Calculate which source detail this row belongs to (1-based index)
+//             const sourceDetailIndex = (i % sourceDetailCount) + 1;
+            
+//             expandedRows.push({
+//                 sourceDetailIndex: sourceDetailIndex, // The index from source details
+//                 cloud: clouds[0] || 'N/A', // Cloud stays the same
+//                 sourceType: sourceTypes[i] || sourceTypes[0] || 'N/A',
+//                 mode: modes[i] || modes[0] || 'N/A',
+//                 ingestionTool: ingestionTools[i] || ingestionTools[0] || 'N/A',
+//                 orchestrationTool: orchestrationTools[0] || 'N/A', // These stay the same
+//                 transformationTool: transformationTools[0] || 'N/A',
+//                 dataStorage: dataStorages[0] || 'N/A'
+//             });
+            
+//             console.log(`  → Expanded row ${i + 1} assigned to Source Detail #${sourceDetailIndex}`);
+//         }
+//     });
+    
+//     console.log(`📊 Total expanded rows: ${expandedRows.length} (from ${data.length} original database rows)`);
+//     console.log(`📊 Showing ALL ${expandedRows.length} rows`);
+
+//     // ✅ SHOW ALL ROWS (NO LIMIT)
+//     expandedRows.forEach((item, index) => {
+//         const tr = document.createElement('tr');
+//         tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+        
+//         // Add visual indicator when index changes
+//         if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+//             tr.style.borderTop = '2px solid #667eea';
+//         }
+        
+//         tr.innerHTML = `
+//             <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+//             <td>${item.cloud}</td>
+//             <td>${item.sourceType}</td>
+//             <td>${item.mode}</td>
+//             <td>${item.ingestionTool}</td>
+//             <td>${item.orchestrationTool}</td>
+//             <td>${item.transformationTool}</td>
+//             <td>${item.dataStorage}</td>
+//         `;
+        
+//         apiResultsBody.appendChild(tr);
+        
+//         console.log(`✓ Row ${index + 1} added with Source Detail Index: ${item.sourceDetailIndex}`, item);
+//     });
+    
+//     // Ensure container is visible
+//     if (apiResultsContainer) {
+//         apiResultsContainer.style.display = 'block';
+//         apiResultsContainer.classList.add('show');
+//         console.log('✓ API Results container made visible');
+//     }
+    
+//     console.log(`✅ Successfully populated ALL ${expandedRows.length} rows`);
+// }
+
+
+function populateAPIResultsTable(data) {
+    const apiResultsBody = document.getElementById('apiResultsBody');
+    const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+    if (!apiResultsBody) {
+        console.error('❌ apiResultsBody element not found');
+        return;
+    }
+    
+    // Clear existing rows
+    apiResultsBody.innerHTML = '';
+
+    console.log('📊 Populating table with data:', data);
+    console.log('📊 Total rows received:', data.length);
+
+    if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+        apiResultsBody.appendChild(tr);
+        return;
     }
 
+    // ===== EXPAND COMMA-SEPARATED VALUES INTO SEPARATE ROWS =====
+    const expandedRows = [];
+    
+    data.forEach((item, dataRowIndex) => {
+        // Helper function to safely split and clean values
+        const safeSplit = (value) => {
+            if (!value || value === null || value === undefined) return ['N/A'];
+            // Split by comma, trim whitespace, filter out empty strings and 'null' values
+            const split = String(value).split(',')
+                .map(s => s.trim())
+                .filter(s => s && s !== 'null' && s !== '');
+            return split.length > 0 ? split : ['N/A'];
+        };
+        
+        // Split each field
+        const clouds = safeSplit(item.cloud);
+        const sourceTypes = safeSplit(item.source_type);
+        const modes = safeSplit(item.mode);
+        const ingestionTools = safeSplit(item.ingestion_tool);
+        const orchestrationTools = safeSplit(item.orchestration_tool);
+        const transformationTools = safeSplit(item.transformation_tool);
+        const dataStorages = safeSplit(item.data_storage);
+        
+        // Find the maximum length to determine how many rows we need
+        const maxLength = Math.max(
+            sourceTypes.length,
+            modes.length,
+            ingestionTools.length
+        );
+        
+        console.log(`Processing database row ${dataRowIndex + 1} - will create ${maxLength} expanded rows`);
+        
+        // ===== ALL EXPANDED ROWS FROM SAME DATABASE ROW GET SAME INDEX =====
+        for (let i = 0; i < maxLength; i++) {
+            expandedRows.push({
+                sourceDetailIndex: dataRowIndex + 1, // Same index for all rows from this database row
+                cloud: clouds[0] || 'N/A', // Cloud stays the same
+                sourceType: sourceTypes[i] || sourceTypes[0] || 'N/A',
+                mode: modes[i] || modes[0] || 'N/A',
+                ingestionTool: ingestionTools[i] || ingestionTools[0] || 'N/A',
+                orchestrationTool: orchestrationTools[0] || 'N/A', // These stay the same
+                transformationTool: transformationTools[0] || 'N/A',
+                dataStorage: dataStorages[0] || 'N/A'
+            });
+            
+            console.log(`  → Expanded row ${i + 1} assigned index: ${dataRowIndex + 1}`);
+        }
+    });
+    
+    console.log(`📊 Total expanded rows: ${expandedRows.length} (from ${data.length} original database rows)`);
+    console.log(`📊 Showing ALL ${expandedRows.length} rows`);
 
+    // ✅ SHOW ALL ROWS (NO LIMIT)
+
+
+    // ✅ SHOW ONLY ROWS WITH ID <= 10
+        expandedRows
+            .filter(item => item.sourceDetailIndex <= 10)
+            .forEach((item, index) => {
+
+                const tr = document.createElement('tr');
+                tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+                
+                if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+                    tr.style.borderTop = '2px solid #667eea';
+                }
+                
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+                    <td>${item.cloud}</td>
+                    <td>${item.sourceType}</td>
+                    <td>${item.mode}</td>
+                    <td>${item.ingestionTool}</td>
+                    <td>${item.orchestrationTool}</td>
+                    <td>${item.transformationTool}</td>
+                    <td>${item.dataStorage}</td>
+                `;
+
+                apiResultsBody.appendChild(tr);
+        });
+
+    // expandedRows.forEach((item, index) => {
+    //     const tr = document.createElement('tr');
+    //     tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+        
+    //     // Add visual indicator when index changes (new database row group)
+    //     if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+    //         tr.style.borderTop = '2px solid #667eea';
+    //     }
+        
+    //     tr.innerHTML = `
+    //         <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+    //         <td>${item.cloud}</td>
+    //         <td>${item.sourceType}</td>
+    //         <td>${item.mode}</td>
+    //         <td>${item.ingestionTool}</td>
+    //         <td>${item.orchestrationTool}</td>
+    //         <td>${item.transformationTool}</td>
+    //         <td>${item.dataStorage}</td>
+    //     `;
+        
+    //     apiResultsBody.appendChild(tr);
+        
+    //     console.log(`✓ Row ${index + 1} displayed with index: ${item.sourceDetailIndex}`, item);
+    // });
+    
+    // Ensure container is visible
+    if (apiResultsContainer) {
+        apiResultsContainer.style.display = 'block';
+        apiResultsContainer.classList.add('show');
+        console.log('✓ API Results container made visible');
+    }
+    
+    console.log(`✅ Successfully populated ALL ${expandedRows.length} rows`);
+}
     // ===== FINAL SUBMIT BUTTON =====
     const finalGoButton = document.getElementById('finalGoButton');
 
