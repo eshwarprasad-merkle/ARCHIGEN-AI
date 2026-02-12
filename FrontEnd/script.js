@@ -1623,30 +1623,58 @@ function populateAPIResultsTable(data) {
     console.log(`📊 Showing ALL ${expandedRows.length} rows`);
 
     // ✅ SHOW ALL ROWS (NO LIMIT)
-    expandedRows.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+
+
+    // ✅ SHOW ONLY ROWS WITH ID <= 10
+        expandedRows
+            .filter(item => item.sourceDetailIndex <= 10)
+            .forEach((item, index) => {
+
+                const tr = document.createElement('tr');
+                tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+                
+                if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+                    tr.style.borderTop = '2px solid #667eea';
+                }
+                
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+                    <td>${item.cloud}</td>
+                    <td>${item.sourceType}</td>
+                    <td>${item.mode}</td>
+                    <td>${item.ingestionTool}</td>
+                    <td>${item.orchestrationTool}</td>
+                    <td>${item.transformationTool}</td>
+                    <td>${item.dataStorage}</td>
+                `;
+
+                apiResultsBody.appendChild(tr);
+        });
+
+    // expandedRows.forEach((item, index) => {
+    //     const tr = document.createElement('tr');
+    //     tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
         
-        // Add visual indicator when index changes (new database row group)
-        if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
-            tr.style.borderTop = '2px solid #667eea';
-        }
+    //     // Add visual indicator when index changes (new database row group)
+    //     if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+    //         tr.style.borderTop = '2px solid #667eea';
+    //     }
         
-        tr.innerHTML = `
-            <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
-            <td>${item.cloud}</td>
-            <td>${item.sourceType}</td>
-            <td>${item.mode}</td>
-            <td>${item.ingestionTool}</td>
-            <td>${item.orchestrationTool}</td>
-            <td>${item.transformationTool}</td>
-            <td>${item.dataStorage}</td>
-        `;
+    //     tr.innerHTML = `
+    //         <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+    //         <td>${item.cloud}</td>
+    //         <td>${item.sourceType}</td>
+    //         <td>${item.mode}</td>
+    //         <td>${item.ingestionTool}</td>
+    //         <td>${item.orchestrationTool}</td>
+    //         <td>${item.transformationTool}</td>
+    //         <td>${item.dataStorage}</td>
+    //     `;
         
-        apiResultsBody.appendChild(tr);
+    //     apiResultsBody.appendChild(tr);
         
-        console.log(`✓ Row ${index + 1} displayed with index: ${item.sourceDetailIndex}`, item);
-    });
+    //     console.log(`✓ Row ${index + 1} displayed with index: ${item.sourceDetailIndex}`, item);
+    // });
     
     // Ensure container is visible
     if (apiResultsContainer) {

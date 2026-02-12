@@ -9,8 +9,8 @@ CORS(app)
 # Note: In a production environment, consider using environment variables for these strings
 DB_CONFIG = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=IN-2TJSYP3;"
-    "DATABASE=ArchiGenAI_new;"
+    "SERVER=IN-1YQNYP3;"
+    "DATABASE=archigenai2;"
     "Trusted_Connection=yes;"
     "TrustServerCertificate=yes;"
 )
