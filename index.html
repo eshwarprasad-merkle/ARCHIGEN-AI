@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXA</title>
+    <!-- <link rel="icon" type="image/x-icon" href="/images/favicon.ico"> -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="header">
+            <h1>NEXA</h1>
+            <p>NextGen Engineered eXpert Architecture <br>Configure your tech stack sequence</p>
+        </div>
+
+        <div class="form-container" autocomplete="off">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="dropdowns-container">
+                <div class="dropdown-row first-row">
+                    <div class="form-group">
+                        <label for="Country">Country</label>
+                        <select class="dropdown" id="Country" autocomplete="off">
+                            <option value="">Select</option>
+                            <!-- Options populated from database -->
+                        </select>
+                        <span class="checkmark" id="check1">✓</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloudStack">Cloud Stack</label>
+                        <select class="dropdown" id="cloudStack" autocomplete="off">
+                            <option value="">Select</option>
+                            <!-- Options populated from database -->
+                        </select>
+                        <span class="checkmark" id="check2">✓</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Welldefined">Well Defined Use Case</label>
+                        <select class="dropdown" id="Welldefined" autocomplete="off">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span class="checkmark" id="check3">✓</span>
+                    </div>
+                </div>
+
+                <div class="dropdown-row second-row">
+                    <div class="form-group">
+                        <label for="involvesML">Involves ML</label>
+                        <select class="dropdown" id="involvesML" autocomplete="off">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span class="checkmark" id="check4">✓</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unstructuredData">Unstructured Data</label>
+                        <select class="dropdown" id="unstructuredData" autocomplete="off">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span class="checkmark" id="check5">✓</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storagesolution">Storage Solution</label>
+                        <select class="dropdown" id="storagesolution" autocomplete="off" disabled>
+                            <option value="Data Warehouse">Data Warehouse</option>
+                            <option value="Data Lake">Data Lake</option>
+                        </select>
+                        <span class="checkmark" id="check6">✓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="techstack-container">
+            <div class="techstack-header">
+                <h2>Tech Stack Selection</h2>
+                <p>Type and select technologies to build your stack sequence</p>
+            </div>
+        
+            <div class="techstack-content">
+                <div class="techstack-input-section">
+                    <h3>Add Technologies</h3>
+                    <div id="techInputs" class="tech-inputs-container">
+                        <div class="tech-input-group">
+                            <div class="tech-input-wrapper">
+                                <input
+                                    type="text"
+                                    class="tech-input"
+                                    placeholder="Type technology name (e.g., Airflow)"
+                                    autocomplete="off"
+                                >
+                                <div class="tech-suggestions" style="display: none;">
+                                    <ul class="suggestions-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="selected-techs-summary">
+                    <p>Selected: <span id="techSummary">0 technologies</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ FIXED: Source Details Container -->
+        <div class="source-details-container" id="sourceDetailsContainer" style="display: block;">
+            <div class="source-details-header">
+                <h2>Source Details</h2>
+                <p>Select and add multiple source configurations</p>
+            </div>
+
+            <div class="source-selection">  
+                <div class="source-input-group">
+                    <div class="form-group">
+                        <label for="sourceTypeDropdown">Source Type</label>
+                        <select class="dropdown" id="sourceTypeDropdown" multiple>
+                            <!-- Options populated from database -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modeDropdown">Mode</label>
+                        <select class="dropdown" id="modeDropdown" multiple>
+                            <!-- Options populated from database -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="varietyDropdown">Variety</label>
+                        <select class="dropdown" id="varietyDropdown" multiple>
+                            <!-- Options populated from database -->
+                        </select>
+                    </div>
+
+                    <!-- ✅ FIXED: Changed button ID to match JavaScript -->
+                    <button class="add-row-btn" id="addSourceButton">+ Add Source</button>
+                </div>
+
+                <!-- ✅ ADDED: Source Details Table to show added combinations -->
+                <div class="source-table-wrapper" style="margin-top: 20px;">
+                    <h3>Added Source Details</h3>
+                    <table class="source-table" id="sourceTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Source Types</th>
+                                <th>Modes</th>
+                                <th>Varieties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sourceDetailsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888;">No source details added yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ FIXED: API Results Container with correct table structure -->
+    <!-- ✅ FIXED: API Results Container with correct table structure -->
+        <div class="api-results-container" id="apiResultsContainer" style="display: none;">
+            <div class="api-results-header">
+                <h2>✓ Tech Stack Results</h2>
+                <p>Showing first 10 results from your configuration</p>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="api-results-table" id="apiResultsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Cloud</th>
+                            <th>Source Type</th>
+                            <th>Mode</th>
+                            <th>Ingestion Tool</th>
+                            <th>Orchestration Tool</th>
+                            <th>Transformation Tool</th>
+                            <th>Data Storage</th>
+                           
+                        </tr>
+                    </thead>
+                    <tbody id="apiResultsBody">
+                        <!-- Results populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ✅ ADD THIS NEW SECTION: Architecture Explanation Container -->
+        <div class="json-container" id="apiArchitectureContainer" style="display: none;">
+            <div class="json-header">
+                <h2>📋 Architecture Details</h2>
+                <button class="close-json" id="closeApiArchitecture">&times;</button>
+            </div>
+            <div class="json-content">
+                <pre id="apiArchitectureCode"></pre>
+            </div>
+        </div>
+
+        <!-- ML Results Container (keeping as is) -->
+        <div class="ml-results-container" id="mlResultsContainer" style="display: none;">
+            <div class="ml-results-header">
+                <h2>✓ ML Project - Data Lake Tech Stack Recommendations</h2>
+                <p>Tech stack configurations optimized for Machine Learning projects</p>
+                <button class="close-ml-results" id="closeMlResults">&times;</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="ml-results-table" id="mlResultsTable">
+                    <thead>
+                        <tr>
+                            <th>Cloud Provider</th>
+                            <th>Service</th>
+                            <th>Source Type</th>
+                            <th>Mode</th>
+                            <th>Tool</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mlResultsBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="ml-results-console" id="mlResultsConsole">
+                <pre id="mlConsoleOutput"></pre>
+            </div>
+        </div>
+
+        <!-- ✅ FIXED: Final Actions Container -->
+        <div class="final-actions-container">
+            <button class="go-button-final" id="finalGoButton">Submit Configuration</button>
+            <button class="reset-button" id="resetButton">Reset All</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
