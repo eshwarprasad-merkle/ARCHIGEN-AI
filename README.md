@@ -63,7 +63,7 @@ Open `ARCHGENAI_SQL_SCRIPT.sql` in SSMS and execute it on your selected database
 From the project directory:
 
 ```bash
-python app.py
+python main.py
 ```
 
 ---
