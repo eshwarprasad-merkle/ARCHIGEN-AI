@@ -1242,80 +1242,421 @@ function applySourceRules() {
     }
 
 
-    // ===== POPULATE API RESULTS TABLE (FIRST 10 ROWS) =====
-    function populateAPIResultsTable(data) {
-        const apiResultsBody = document.getElementById('apiResultsBody');
-        const apiResultsContainer = document.getElementById('apiResultsContainer');
+ 
+//  function populateAPIResultsTable(data) {
+//         const apiResultsBody = document.getElementById('apiResultsBody');
+//         const apiResultsContainer = document.getElementById('apiResultsContainer');
         
-        if (!apiResultsBody) {
-            console.error('❌ apiResultsBody element not found');
-            return;
-        }
+//         if (!apiResultsBody) {
+//             console.error('❌ apiResultsBody element not found');
+//             return;
+//         }
         
-        // Clear existing rows
-        apiResultsBody.innerHTML = '';
+//         // Clear existing rows
+//         apiResultsBody.innerHTML = '';
 
-        console.log('📊 Populating table with data:', data);
-        console.log('📊 Total rows received:', data.length);
+//         console.log('📊 Populating table with data:', data);
+//         console.log('📊 Total rows received:', data.length);
 
-        if (!data || data.length === 0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
-            apiResultsBody.appendChild(tr);
-            return;
-        }
+//         if (!data || data.length === 0) {
+//             const tr = document.createElement('tr');
+//             tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+//             apiResultsBody.appendChild(tr);
+//             return;
+//         }
 
-        // ✅ LIMIT TO FIRST 10 ROWS
-        const limitedData = data.slice(0, 10);
-        console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
+//         // ✅ LIMIT TO FIRST 10 ROWS
+//         const limitedData = data.slice(0, 10);
+//         console.log(`📊 Displaying first ${limitedData.length} rows out of ${data.length} total`);
 
-        // Populate each row
-        limitedData.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+//         // Populate each row
+//         limitedData.forEach((item, index) => {
+//             const tr = document.createElement('tr');
+//             tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
             
-            // Extract fields from the API response
-            const cloud = item.cloud || 'N/A';
-            const sourceType = item.source_type || 'N/A';
-            const mode = item.mode || 'N/A';
-            const ingestionTool = item.ingestion_tool || 'N/A';
-            const orchestrationTool = item.orchestration_tool || 'N/A';
-            const transformationTool = item.transformation_tool || 'N/A';
-            const dataStorage = item.data_storage || 'N/A';
+//             // Extract fields from the API response
+//             const cloud = item.cloud || 'N/A';
+//             const sourceType = item.source_type || 'N/A';
+//             const mode = item.mode || 'N/A';
+//             const ingestionTool = item.ingestion_tool || 'N/A';
+//             const orchestrationTool = item.orchestration_tool || 'N/A';
+//             const transformationTool = item.transformation_tool || 'N/A';
+//             const dataStorage = item.data_storage || 'N/A';
             
-            tr.innerHTML = `
-                <td>${cloud}</td>
-                <td>${sourceType}</td>
-                <td>${mode}</td>
-                <td>${ingestionTool}</td>
-                <td>${orchestrationTool}</td>
-                <td>${transformationTool}</td>
-                <td>${dataStorage}</td>
-            `;
+//             tr.innerHTML = `
+//                 <td>${cloud}</td>
+//                 <td>${sourceType}</td>
+//                 <td>${mode}</td>
+//                 <td>${ingestionTool}</td>
+//                 <td>${orchestrationTool}</td>
+//                 <td>${transformationTool}</td>
+//                 <td>${dataStorage}</td>
+//             `;
             
-            apiResultsBody.appendChild(tr);
+//             apiResultsBody.appendChild(tr);
             
-            console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
-        });
+//             console.log(`✓ Row ${index + 1} added:`, {cloud, sourceType, mode, ingestionTool, orchestrationTool, transformationTool, dataStorage});
+//         });
         
-        // Show message if more rows exist
-        if (data.length > 10) {
-            const infoTr = document.createElement('tr');
-            infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
-            apiResultsBody.appendChild(infoTr);
-        }
+//         // Show message if more rows exist
+//         if (data.length > 10) {
+//             const infoTr = document.createElement('tr');
+//             infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${data.length} total results</td>`;
+//             apiResultsBody.appendChild(infoTr);
+//         }
         
-        // Ensure container is visible
-        if (apiResultsContainer) {
-            apiResultsContainer.style.display = 'block';
-            apiResultsContainer.classList.add('show');
-            console.log('✓ API Results container made visible');
-        }
+//         // Ensure container is visible
+//         if (apiResultsContainer) {
+//             apiResultsContainer.style.display = 'block';
+//             apiResultsContainer.classList.add('show');
+//             console.log('✓ API Results container made visible');
+//         }
         
-        console.log(`✅ Successfully populated ${limitedData.length} rows`);
+//         console.log(`✅ Successfully populated ${limitedData.length} rows`);
+//     }
+
+// function populateAPIResultsTable(data) {
+//     const apiResultsBody = document.getElementById('apiResultsBody');
+//     const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+//     if (!apiResultsBody) {
+//         console.error('❌ apiResultsBody element not found');
+//         return;
+//     }
+    
+//     // Clear existing rows
+//     apiResultsBody.innerHTML = '';
+
+//     console.log('📊 Populating table with data:', data);
+//     console.log('📊 Total rows received:', data.length);
+
+//     if (!data || data.length === 0) {
+//         const tr = document.createElement('tr');
+//         tr.innerHTML = '<td colspan="7" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+//         apiResultsBody.appendChild(tr);
+//         return;
+//     }
+
+//     // ===== EXPAND COMMA-SEPARATED VALUES INTO SEPARATE ROWS =====
+//     const expandedRows = [];
+    
+//     data.forEach(item => {
+//         // Helper function to safely split and clean values
+//         const safeSplit = (value) => {
+//             if (!value || value === null || value === undefined) return ['N/A'];
+//             // Split by comma, trim whitespace, filter out empty strings and 'null' values
+//             const split = String(value).split(',')
+//                 .map(s => s.trim())
+//                 .filter(s => s && s !== 'null' && s !== '');
+//             return split.length > 0 ? split : ['N/A'];
+//         };
+        
+//         // Split each field
+//         const clouds = safeSplit(item.cloud);
+//         const sourceTypes = safeSplit(item.source_type);
+//         const modes = safeSplit(item.mode);
+//         const ingestionTools = safeSplit(item.ingestion_tool);
+//         const orchestrationTools = safeSplit(item.orchestration_tool);
+//         const transformationTools = safeSplit(item.transformation_tool);
+//         const dataStorages = safeSplit(item.data_storage);
+        
+//         // Find the maximum length to determine how many rows we need
+//         const maxLength = Math.max(
+//             sourceTypes.length,
+//             modes.length,
+//             ingestionTools.length
+//         );
+        
+//         console.log(`Processing item - maxLength: ${maxLength}`, {
+//             sourceTypes: sourceTypes.length,
+//             modes: modes.length,
+//             ingestionTools: ingestionTools.length
+//         });
+        
+//         // Create rows by matching indices
+//         for (let i = 0; i < maxLength; i++) {
+//             expandedRows.push({
+//                 cloud: clouds[0] || 'N/A', // Cloud stays the same
+//                 sourceType: sourceTypes[i] || sourceTypes[0] || 'N/A',
+//                 mode: modes[i] || modes[0] || 'N/A',
+//                 ingestionTool: ingestionTools[i] || ingestionTools[0] || 'N/A',
+//                 orchestrationTool: orchestrationTools[0] || 'N/A', // These stay the same
+//                 transformationTool: transformationTools[0] || 'N/A',
+//                 dataStorage: dataStorages[0] || 'N/A'
+//             });
+//         }
+//     });
+    
+//     console.log(`📊 Expanded to ${expandedRows.length} total rows`);
+    
+//     // ✅ LIMIT TO FIRST 10 ROWS
+//     const limitedData = expandedRows.slice(0, 10);
+//     console.log(`📊 Displaying first ${limitedData.length} rows out of ${expandedRows.length} total`);
+
+//     // Populate each row
+//     limitedData.forEach((item, index) => {
+//         const tr = document.createElement('tr');
+//         tr.style.animation = `slideInScale 0.3s ease ${index * 0.05}s both`;
+        
+//         tr.innerHTML = `
+//             <td>${item.cloud}</td>
+//             <td>${item.sourceType}</td>
+//             <td>${item.mode}</td>
+//             <td>${item.ingestionTool}</td>
+//             <td>${item.orchestrationTool}</td>
+//             <td>${item.transformationTool}</td>
+//             <td>${item.dataStorage}</td>
+//         `;
+        
+//         apiResultsBody.appendChild(tr);
+        
+//         console.log(`✓ Row ${index + 1} added:`, item);
+//     });
+    
+//     // Show message if more rows exist
+//     if (expandedRows.length > 10) {
+//         const infoTr = document.createElement('tr');
+//         infoTr.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; background: #f0f0f0; color: #666; font-style: italic;">Showing first 10 of ${expandedRows.length} total combinations</td>`;
+//         apiResultsBody.appendChild(infoTr);
+//     }
+    
+//     // Ensure container is visible
+//     if (apiResultsContainer) {
+//         apiResultsContainer.style.display = 'block';
+//         apiResultsContainer.classList.add('show');
+//         console.log('✓ API Results container made visible');
+//     }
+    
+//     console.log(`✅ Successfully populated ${limitedData.length} rows`);
+// }
+// function populateAPIResultsTable(data) {
+//     const apiResultsBody = document.getElementById('apiResultsBody');
+//     const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+//     if (!apiResultsBody) {
+//         console.error('❌ apiResultsBody element not found');
+//         return;
+//     }
+    
+//     // Clear existing rows
+//     apiResultsBody.innerHTML = '';
+
+//     console.log('📊 Populating table with data:', data);
+//     console.log('📊 Total rows received:', data.length);
+
+//     if (!data || data.length === 0) {
+//         const tr = document.createElement('tr');
+//         tr.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+//         apiResultsBody.appendChild(tr);
+//         return;
+//     }
+
+//     // ===== GET SOURCE DETAIL COUNT =====
+//     const sourceDetailCount = allSourceCombinations.length;
+//     console.log(`📋 Total source details added: ${sourceDetailCount}`);
+
+//     // ===== EXPAND COMMA-SEPARATED VALUES INTO SEPARATE ROWS =====
+//     const expandedRows = [];
+    
+//     data.forEach((item, dataRowIndex) => {
+//         // Helper function to safely split and clean values
+//         const safeSplit = (value) => {
+//             if (!value || value === null || value === undefined) return ['N/A'];
+//             // Split by comma, trim whitespace, filter out empty strings and 'null' values
+//             const split = String(value).split(',')
+//                 .map(s => s.trim())
+//                 .filter(s => s && s !== 'null' && s !== '');
+//             return split.length > 0 ? split : ['N/A'];
+//         };
+        
+//         // Split each field
+//         const clouds = safeSplit(item.cloud);
+//         const sourceTypes = safeSplit(item.source_type);
+//         const modes = safeSplit(item.mode);
+//         const ingestionTools = safeSplit(item.ingestion_tool);
+//         const orchestrationTools = safeSplit(item.orchestration_tool);
+//         const transformationTools = safeSplit(item.transformation_tool);
+//         const dataStorages = safeSplit(item.data_storage);
+        
+//         // Find the maximum length to determine how many rows we need
+//         const maxLength = Math.max(
+//             sourceTypes.length,
+//             modes.length,
+//             ingestionTools.length
+//         );
+        
+//         console.log(`Processing data row ${dataRowIndex + 1} - will create ${maxLength} expanded rows`);
+        
+//         // ===== ASSIGN SOURCE DETAIL INDEX TO EACH EXPANDED ROW =====
+//         // Each expanded row gets an index from 1 to sourceDetailCount, cycling through
+//         for (let i = 0; i < maxLength; i++) {
+//             // Calculate which source detail this row belongs to (1-based index)
+//             const sourceDetailIndex = (i % sourceDetailCount) + 1;
+            
+//             expandedRows.push({
+//                 sourceDetailIndex: sourceDetailIndex, // The index from source details
+//                 cloud: clouds[0] || 'N/A', // Cloud stays the same
+//                 sourceType: sourceTypes[i] || sourceTypes[0] || 'N/A',
+//                 mode: modes[i] || modes[0] || 'N/A',
+//                 ingestionTool: ingestionTools[i] || ingestionTools[0] || 'N/A',
+//                 orchestrationTool: orchestrationTools[0] || 'N/A', // These stay the same
+//                 transformationTool: transformationTools[0] || 'N/A',
+//                 dataStorage: dataStorages[0] || 'N/A'
+//             });
+            
+//             console.log(`  → Expanded row ${i + 1} assigned to Source Detail #${sourceDetailIndex}`);
+//         }
+//     });
+    
+//     console.log(`📊 Total expanded rows: ${expandedRows.length} (from ${data.length} original database rows)`);
+//     console.log(`📊 Showing ALL ${expandedRows.length} rows`);
+
+//     // ✅ SHOW ALL ROWS (NO LIMIT)
+//     expandedRows.forEach((item, index) => {
+//         const tr = document.createElement('tr');
+//         tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+        
+//         // Add visual indicator when index changes
+//         if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+//             tr.style.borderTop = '2px solid #667eea';
+//         }
+        
+//         tr.innerHTML = `
+//             <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+//             <td>${item.cloud}</td>
+//             <td>${item.sourceType}</td>
+//             <td>${item.mode}</td>
+//             <td>${item.ingestionTool}</td>
+//             <td>${item.orchestrationTool}</td>
+//             <td>${item.transformationTool}</td>
+//             <td>${item.dataStorage}</td>
+//         `;
+        
+//         apiResultsBody.appendChild(tr);
+        
+//         console.log(`✓ Row ${index + 1} added with Source Detail Index: ${item.sourceDetailIndex}`, item);
+//     });
+    
+//     // Ensure container is visible
+//     if (apiResultsContainer) {
+//         apiResultsContainer.style.display = 'block';
+//         apiResultsContainer.classList.add('show');
+//         console.log('✓ API Results container made visible');
+//     }
+    
+//     console.log(`✅ Successfully populated ALL ${expandedRows.length} rows`);
+// }
+
+
+function populateAPIResultsTable(data) {
+    const apiResultsBody = document.getElementById('apiResultsBody');
+    const apiResultsContainer = document.getElementById('apiResultsContainer');
+    
+    if (!apiResultsBody) {
+        console.error('❌ apiResultsBody element not found');
+        return;
+    }
+    
+    // Clear existing rows
+    apiResultsBody.innerHTML = '';
+
+    console.log('📊 Populating table with data:', data);
+    console.log('📊 Total rows received:', data.length);
+
+    if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px; color: #888;">No results found</td>';
+        apiResultsBody.appendChild(tr);
+        return;
     }
 
+    // ===== EXPAND COMMA-SEPARATED VALUES INTO SEPARATE ROWS =====
+    const expandedRows = [];
+    
+    data.forEach((item, dataRowIndex) => {
+        // Helper function to safely split and clean values
+        const safeSplit = (value) => {
+            if (!value || value === null || value === undefined) return ['N/A'];
+            // Split by comma, trim whitespace, filter out empty strings and 'null' values
+            const split = String(value).split(',')
+                .map(s => s.trim())
+                .filter(s => s && s !== 'null' && s !== '');
+            return split.length > 0 ? split : ['N/A'];
+        };
+        
+        // Split each field
+        const clouds = safeSplit(item.cloud);
+        const sourceTypes = safeSplit(item.source_type);
+        const modes = safeSplit(item.mode);
+        const ingestionTools = safeSplit(item.ingestion_tool);
+        const orchestrationTools = safeSplit(item.orchestration_tool);
+        const transformationTools = safeSplit(item.transformation_tool);
+        const dataStorages = safeSplit(item.data_storage);
+        
+        // Find the maximum length to determine how many rows we need
+        const maxLength = Math.max(
+            sourceTypes.length,
+            modes.length,
+            ingestionTools.length
+        );
+        
+        console.log(`Processing database row ${dataRowIndex + 1} - will create ${maxLength} expanded rows`);
+        
+        // ===== ALL EXPANDED ROWS FROM SAME DATABASE ROW GET SAME INDEX =====
+        for (let i = 0; i < maxLength; i++) {
+            expandedRows.push({
+                sourceDetailIndex: dataRowIndex + 1, // Same index for all rows from this database row
+                cloud: clouds[0] || 'N/A', // Cloud stays the same
+                sourceType: sourceTypes[i] || sourceTypes[0] || 'N/A',
+                mode: modes[i] || modes[0] || 'N/A',
+                ingestionTool: ingestionTools[i] || ingestionTools[0] || 'N/A',
+                orchestrationTool: orchestrationTools[0] || 'N/A', // These stay the same
+                transformationTool: transformationTools[0] || 'N/A',
+                dataStorage: dataStorages[0] || 'N/A'
+            });
+            
+            console.log(`  → Expanded row ${i + 1} assigned index: ${dataRowIndex + 1}`);
+        }
+    });
+    
+    console.log(`📊 Total expanded rows: ${expandedRows.length} (from ${data.length} original database rows)`);
+    console.log(`📊 Showing ALL ${expandedRows.length} rows`);
 
+    // ✅ SHOW ALL ROWS (NO LIMIT)
+    expandedRows.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.style.animation = `slideInScale 0.3s ease ${Math.min(index * 0.02, 1)}s both`;
+        
+        // Add visual indicator when index changes (new database row group)
+        if (index > 0 && item.sourceDetailIndex !== expandedRows[index - 1].sourceDetailIndex) {
+            tr.style.borderTop = '2px solid #667eea';
+        }
+        
+        tr.innerHTML = `
+            <td style="font-weight: bold; color: #667eea; text-align: center;">${item.sourceDetailIndex}</td>
+            <td>${item.cloud}</td>
+            <td>${item.sourceType}</td>
+            <td>${item.mode}</td>
+            <td>${item.ingestionTool}</td>
+            <td>${item.orchestrationTool}</td>
+            <td>${item.transformationTool}</td>
+            <td>${item.dataStorage}</td>
+        `;
+        
+        apiResultsBody.appendChild(tr);
+        
+        console.log(`✓ Row ${index + 1} displayed with index: ${item.sourceDetailIndex}`, item);
+    });
+    
+    // Ensure container is visible
+    if (apiResultsContainer) {
+        apiResultsContainer.style.display = 'block';
+        apiResultsContainer.classList.add('show');
+        console.log('✓ API Results container made visible');
+    }
+    
+    console.log(`✅ Successfully populated ALL ${expandedRows.length} rows`);
+}
     // ===== FINAL SUBMIT BUTTON =====
     const finalGoButton = document.getElementById('finalGoButton');
 
